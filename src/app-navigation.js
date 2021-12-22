@@ -13,8 +13,8 @@ export const navigation = [
         path: '/Tisket1'
       },
       {
-        text: 'Tasks',
-        path: '/tasks'
+        text: 'TicketT1053113',
+        path: '/TicketT1053113'
       }
     ]
   }

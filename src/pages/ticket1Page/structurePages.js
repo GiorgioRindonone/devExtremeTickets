@@ -17,8 +17,8 @@ export const datapages={
                 caption: 'Running Test',
             },
             {
-                dataField: 'TestTypes',
-                caption: 'Test Types',
+                dataField: 'States',
+                caption: 'States',
                 lookup: {
                     dataSource: states,
                     valueExpr: 'ID',
