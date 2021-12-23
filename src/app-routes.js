@@ -1,5 +1,5 @@
 import { withNavigationWatcher } from './contexts/navigation';
-import { HomePage, TasksPage, ticket1Page, TicketT1053113 } from './pages';
+import { HomePage, TasksPage, ticket1Page, TicketT1053113, TicketForm } from './pages';
 
 const routes = [
   {
@@ -13,6 +13,10 @@ const routes = [
   {
     path: '/home',
     component: HomePage
+  },
+  {
+    path: '/ticketform',
+    component: TicketForm
   }
 ];
 

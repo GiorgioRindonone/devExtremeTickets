@@ -80,15 +80,26 @@ export const directions = {
   export const testTypes = [{
     "id": 1,
     "name": "Belt durability",
-    "outdoor": false
+    "outdoor": false, 
+    "createdBy": 1,
+    "enabled": true,
+    "description": "questo test è per verificare la durabilità della cinta"
   }, {
     "id": 2,
     "name": "Endurance",
-    "outdoor": false
+    "outdoor": false,
+    "createdBy": 2,
+    "enabled": true,
+    "description": "calcolare la durata di uno spintone"
+
   }, {
     "id": 3,
     "name": "Belt speed",
-    "outdoor": false
+    "outdoor": false, 
+    "createdBy": 2,
+    "enabled": true,
+    "description": "questo test serve a studiare la velocità della cinta"
+
   }];
   
   //! RIMS 

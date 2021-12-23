@@ -1,7 +1,6 @@
 import './Machines.scss';
 import { machines, directions, states, testTypes, logs } from "../data.js";
 import handlerGrid from "../HandlerData.js";
-import TagBox from "devextreme/ui/tag_box";
 import 'devextreme-react/tag-box'
 import {useCallback, useState, useMemo } from "react";
 import React from 'react';
@@ -39,6 +38,7 @@ import TextArea from "devextreme-react/text-area";
 import { Item } from 'devextreme-react/form';
 import { SpeedDialAction } from 'devextreme-react/speed-dial-action';
 import { SelectBox } from 'devextreme-react/select-box';
+import { TagBox } from 'devextreme-react/tag-box';
 
 const optionDirections = ['auto', 'up', 'down'];
 
@@ -113,7 +113,7 @@ function App(props) {
       return [this.dataField, 'contains', filterValue];
     }
     return function(data) {
-      return (data.AssignedEmployee || []).indexOf(filterValue) !== -1;
+      return (data.TestTypes || []).indexOf(filterValue) !== -1;
     };
   }
 
@@ -260,8 +260,8 @@ function App(props) {
               </ItemPanel>
               <ItemPanel title="Stats">
               </ItemPanel>
-              <ItemPanel title="Capabilities">                   
-                <ItemPanel dataField="TestTypes" editorType="dxTagBox" editorOptions={testTypesEditorOptions} />
+              <ItemPanel title="Capabilities">    
+                <TagBox dataSource={testTypes} valueExpr='id' displayExpr='name' readOnly={true} value={objectSidebarData.TestTypes} />
               </ItemPanel>
               <ItemPanel title="Logs" badge="new">                
                   <List
