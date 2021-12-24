@@ -6,6 +6,23 @@
   }
 }
 
+.flex-container-column {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0 -10px;
+  flex-direction: column;
+}
+.flex-container-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0 -10px;
+  flex-direction: row;
+}
+
 .devextreme-logo {
   width: 200px;
   height: 34px;

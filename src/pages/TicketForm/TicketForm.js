@@ -25,8 +25,11 @@ import DataGrid, {
   SearchPanel,
   StateStoring,
   Form as FormGird,
-  Popup,
+  Popup as PopupGrid,
 } from "devextreme-react/data-grid";
+import {
+    Popup
+  } from 'devextreme-react/popup';
 import TabPanel, { Item as ItemPanel } from "devextreme-react/tab-panel";
 import { Drawer } from "devextreme-react/drawer";
 import Form, { SimpleItem } from "devextreme-react/form";
@@ -50,6 +53,28 @@ function App(props) {
     sidebar === 0 && setSidebar(500);
   };
 
+  //! POPOUP SECTION 
+
+  const [isPopupVisible, setPopupVisibility] = useState(false);
+  const togglePopup = () => {
+    setPopupVisibility(!isPopupVisible);
+  };
+
+  const popUpForm = () => {
+    return (
+        <div>
+                    <Button name="notify" icon="menu" onClick={togglePopup}></Button>
+
+            <Form colCount={4} formData={objectSidebarData}>
+                <SimpleItem dataField="id" colSpan={1} />
+                <SimpleItem dataField="name" colSpan={2} />
+                <SimpleItem dataField="description" colSpan={3} />
+
+            </Form>
+
+        </div>
+    );
+    };
   const onFocusedRowChanged = (e) => {
     e.row && setObjectSidebarData(e.row.data);
     // localStorage.setItem('focusedMachine', JSON.stringify(e.row.data));
@@ -148,24 +173,51 @@ function App(props) {
     <React.Fragment>
       <div className={"content-block flex-container"}>
         <h2>Machines</h2>
-        <div className={"flex-container"}>
+        <div className={"flex-container-row"}>
+        <div className={"flex-container-column"}>
+        <p> open sidebar </p>
           <Button
             icon={sidebar === 500 ? "chevronnext" : "pinright"}
             label={sidebar === 500 ? "Close sidebar" : "Open sidebar"}
             onClick={openSidebar}
-          >
-          </Button>
-          <Button name="Add Row" icon="plus" onClick={addRow}></Button>
-          <Button name="Add Row" icon="edit" onClick={editRow}></Button>
-          <Button name="Add Row" icon="delete" onClick={deleteRow}></Button>
-          <Button name="notify" icon="menu"></Button>
+          ></Button>
+        </div>
+        <div className={"flex-container-column"}>
+        <p> add row </p>
+        <Button name="Add Row" icon="plus" onClick={addRow}></Button>
+
+        </div>
+          <div className={"flex-container-column"}>
+        <p> delete row</p>
+        <Button name="Add Row" icon="delete" onClick={deleteRow}></Button>
+
+        </div>
+          <div className={"flex-container-column"}>
+        <p> close popup </p>
+        <Button name="notify" icon="menu" onClick={togglePopup}></Button>
+
+        </div>
+        <div className={"flex-container-column"}>
+        <p> edit row </p>
+        <Button name="Add Row" icon="edit" onClick={editRow}></Button>
+
+        </div>
+
+
         </div>
       </div>
       <div className={"content-block content-overlay"}>
         <div className={"dx-card responsive-paddings"}>
-
-        
-
+            <div>
+                <Popup
+                    title="Add new test Type"
+                    showTitle={true}
+                    contentRender={popUpForm}
+                    visible={isPopupVisible}
+                    width={500}
+                    // closeOnOutsideClick={true}
+                />
+            </div>
           <DataGrid
             id="grid"
             dataSource={data}
@@ -177,22 +229,23 @@ function App(props) {
             focusedRowEnabled={true}
             onFocusedRowChanged={onFocusedRowChanged}
             onSelectionChanged={selectionChangedHandler}
+            
           >
             <StateStoring
               enabled={true}
               type="localStorage"
               storageKey="machines_grid"
             />
+
             <FilterRow visible={true} />
             <FilterPanel visible={true} />
             <FilterBuilderPopup position={filterBuilderPopupPosition} />
             <HeaderFilter visible={true} />
             <SearchPanel visible={true} />
             <Selection mode="single" />
-            <Editing mode="popup" maxWidth="300px">
+            <Editing mode="popup" maxWidth="300px" >
               <Texts confirmDeleteMessage="are you sure to delete?" />
-            </Editing>
-
+            </Editing>            
             {datapages.machines.main.map((attribute) => {
               return (
                 <Column
@@ -233,8 +286,6 @@ function App(props) {
                 </Column>
               );
             })}
-
-
           </DataGrid>
         </div>
       </div>
