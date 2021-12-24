@@ -112,6 +112,10 @@ function App(props) {
     container.title = text;
   }
 
+  const getFullName = (row) => {
+    return `${row.firstName} ${row.lastName}`;
+  };
+
   function calculateFilterExpression(
     filterValue,
     selectedFilterOperation,
@@ -157,7 +161,7 @@ function App(props) {
           lookup: {
             dataSource: person,
             valueExpr: "id",
-            displayExpr: "firstName",
+            displayExpr: getFullName,
           },
         },
         {
