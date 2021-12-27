@@ -116,7 +116,7 @@ function App(props) {
 
             {
               datapages.machines.main.map((attribute) => {
-                return <Column alignment='left' dataField={attribute.dataField} caption={attribute.caption? attribute.caption : attribute.dataField} allowSorting={attribute.allowSorting? attribute.allowSorting : null} customizeText={attribute.customizeColumnText ? attribute.customizeColumnText : null}>
+                return <Column alignment='left' key={attribute.key ? attribute.key : null} dataField={attribute.dataField} caption={attribute.caption? attribute.caption : attribute.dataField} allowSorting={attribute.allowSorting? attribute.allowSorting : null} customizeText={attribute.customizeColumnText ? attribute.customizeColumnText : null}>
                           {attribute.lookup? 
                           <Lookup 
                             dataSource={attribute.lookup.dataSource? attribute.lookup.dataSource : null} 

@@ -140,21 +140,25 @@ function App(props) {
     machines: {
       main: [
         {
+          key: "id",
           dataField: "name",
           caption: "Name",
           dataType: "string",
         },
         {
+          key: "id",
           dataField: "outdoor",
           caption: "Outdoor",
           dataType: "boolean",
         },
         {
+          key: "id",
           dataField: "description",
           caption: "Descrizione",
           dataType: "string",
         },
         {
+          key: "id",
           dataField: "createdBy",
           caption: "Creato da",
           dataType: "string",
@@ -165,6 +169,7 @@ function App(props) {
           },
         },
         {
+          key: "id",
           dataField: "enabled",
           caption: "Abilitato",
           dataType: "boolean",
@@ -254,6 +259,7 @@ function App(props) {
               return (
                 <Column
                   alignment="left"
+                  key={attribute.key ? attribute.key : null}
                   dataField={attribute.dataField}
                   caption={
                     attribute.caption ? attribute.caption : attribute.dataField

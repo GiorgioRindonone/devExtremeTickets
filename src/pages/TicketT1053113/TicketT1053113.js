@@ -123,16 +123,19 @@ function App(props) {
     machines:{
         main:[
             {
+                key: 'id',
                 dataField: 'name',
                 caption: 'Name',
                 dataType: 'object'
             },
             {
+                key: 'id',
                 dataField: 'year',
                 caption: 'Data di creazione',
                 dataType: 'date'
             },
             {
+                key: 'id',  
                 dataField: 'testId',
                 caption: 'Running Test',
                 dataType: 'string'
@@ -148,6 +151,7 @@ function App(props) {
             //     },
             // },
             {
+                key: 'id',
                 dataField: 'ip',
                 caption: 'ip',
             }
@@ -341,7 +345,7 @@ function App(props) {
             </Column>
             {
               datapages.machines.main.map((attribute) => {
-                return <Column alignment='left' dataField={attribute.dataField} caption={attribute.caption? attribute.caption : attribute.dataField} allowSorting={attribute.allowSorting? attribute.allowSorting : null} customizeText={attribute.customizeColumnText ? attribute.customizeColumnText : null} dataType={attribute.dataType ? attribute.dataType : null}>
+                return <Column alignment='left' key={attribute.key ? attribute.key : null} dataField={attribute.dataField} caption={attribute.caption? attribute.caption : attribute.dataField} allowSorting={attribute.allowSorting? attribute.allowSorting : null} customizeText={attribute.customizeColumnText ? attribute.customizeColumnText : null} dataType={attribute.dataType ? attribute.dataType : null}>
                           {attribute.lookup? 
                           <Lookup 
                             dataSource={attribute.lookup.dataSource? attribute.lookup.dataSource : null} 
