@@ -3,6 +3,8 @@ import handlerGrid from "../HandlerData.js";
 import "devextreme-react/tag-box";
 import { useCallback, useState, useMemo } from "react";
 import React from "react";
+import PopupForm from "./PopupForm.js";
+
 
 import { Button } from "devextreme-react/button";
 import TagBoxContent from "../TagBoxContent.js";
@@ -28,16 +30,85 @@ import DataGrid, {
   Popup as PopupGrid,
 } from "devextreme-react/data-grid";
 import {
-    Popup
-  } from 'devextreme-react/popup';
+  Popup
+} from 'devextreme-react/popup';
 import TabPanel, { Item as ItemPanel } from "devextreme-react/tab-panel";
 import { Drawer } from "devextreme-react/drawer";
-import Form, { SimpleItem } from "devextreme-react/form";
+import Form, { SimpleItem, Item } from "devextreme-react/form";
 import TextArea from "devextreme-react/text-area";
-import { Item } from "devextreme-react/form";
 import { SpeedDialAction } from "devextreme-react/speed-dial-action";
 import { SelectBox } from "devextreme-react/select-box";
 import { TagBox } from "devextreme-react/tag-box";
+const testTypesEditorOptions = {
+  dataSource: testTypes,
+  valueExpr: "name",
+  displayExpr: "Name",
+  readOnly: true,
+};
+const getFullName = (row) => {
+  return `${row.firstName} ${row.lastName}`;
+};
+const datapages = {
+  machines: {
+    main: [
+      {
+        dataField: "name",
+        caption: "Name",
+        dataType: "string",
+      },
+      {
+        dataField: "outdoor",
+        caption: "Outdoor",
+        dataType: "boolean",
+      },
+      {
+        dataField: "description",
+        caption: "Descrizione",
+        dataType: "string",
+      },
+      {
+        dataField: "createdBy",
+        caption: "Creato da",
+        dataType: "string",
+        lookup: {
+          dataSource: person,
+          valueExpr: "id",
+          displayExpr: getFullName,
+        },
+      },
+      {
+        dataField: "enabled",
+        caption: "Abilitato",
+        dataType: "boolean",
+      },
+    ],
+  },
+};
+const notesEditorOptions = { height: 100 };
+
+  function cellTemplate(container, options) {
+    const noBreakSpace = "\u00A0";
+    const text = (options.value || [])
+      .map((element) => options.column.lookup.calculateCellValue(element))
+      .join(", ");
+    container.textContent = text || noBreakSpace;
+    container.title = text;
+  }
+
+ 
+
+  function calculateFilterExpression(
+    filterValue,
+    selectedFilterOperation,
+    target
+  ) {
+    if (target === "search" && typeof filterValue === "string") {
+      return [this.dataField, "contains", filterValue];
+    }
+    return function (data) {
+      return (data.TestTypes || []).indexOf(filterValue) !== -1;
+    };
+  }
 
 function App(props) {
   const [data, setData] = React.useState(testTypes);
@@ -47,39 +118,31 @@ function App(props) {
   const [grid, setGrid] = React.useState(null);
   const [sidebar, setSidebar] = React.useState(0);
 
-  const selectionChangedHandler = (e) => {
+  const selectionChangedHandler = useCallback((e) => {
     setSelectedRowIndex(e.component.getRowIndexByKey(e.selectedRowKeys[0]));
-    setFocusedRowKey(e.component.getRowIndexByKey(e.selectedRowKeys[0]));
+    
     sidebar === 0 && setSidebar(500);
-  };
+  }, [setSelectedRowIndex, sidebar]);
 
   //! POPOUP SECTION 
 
   const [isPopupVisible, setPopupVisibility] = useState(false);
-  const togglePopup = () => {
+
+  const togglePopup = useCallback(() => {
     setPopupVisibility(!isPopupVisible);
-  };
+  }, [setPopupVisibility, isPopupVisible]);
 
-  const popUpForm = () => {
-    return (
-        <div>
-                    <Button name="notify" icon="menu" onClick={togglePopup}></Button>
+  // const popUpForm = useCallback(() => {
+  //   return (
+  //   );
+  // }, [objectSidebarData]);
 
-            <Form colCount={4} formData={objectSidebarData}>
-                <SimpleItem dataField="id" colSpan={1} />
-                <SimpleItem dataField="name" colSpan={2} />
-                <SimpleItem dataField="description" colSpan={3} />
 
-            </Form>
-
-        </div>
-    );
-    };
-  const onFocusedRowChanged = (e) => {
+  const onFocusedRowChanged = useCallback((e) => {
     e.row && setObjectSidebarData(e.row.data);
     // localStorage.setItem('focusedMachine', JSON.stringify(e.row.data));
     console.log(objectSidebarData);
-  };
+  }, [objectSidebarData, setObjectSidebarData]);
 
   const openSidebar = () => {
     console.log(focusedRowKey);
@@ -101,132 +164,58 @@ function App(props) {
     grid.instance.deselectAll();
   };
 
-  const notesEditorOptions = { height: 100 };
+  
 
-  function cellTemplate(container, options) {
-    const noBreakSpace = "\u00A0";
-    const text = (options.value || [])
-      .map((element) => options.column.lookup.calculateCellValue(element))
-      .join(", ");
-    container.textContent = text || noBreakSpace;
-    container.title = text;
-  }
-
-  const getFullName = (row) => {
-    return `${row.firstName} ${row.lastName}`;
-  };
-
-  function calculateFilterExpression(
-    filterValue,
-    selectedFilterOperation,
-    target
-  ) {
-    if (target === "search" && typeof filterValue === "string") {
-      return [this.dataField, "contains", filterValue];
-    }
-    return function (data) {
-      return (data.TestTypes || []).indexOf(filterValue) !== -1;
-    };
-  }
-
-  const testTypesEditorOptions = {
-    dataSource: testTypes,
-    valueExpr: "name",
-    displayExpr: "Name",
-    readOnly: true,
-  };
-
-  const datapages = {
-    machines: {
-      main: [
-        {
-          key: "id",
-          dataField: "name",
-          caption: "Name",
-          dataType: "string",
-        },
-        {
-          key: "id",
-          dataField: "outdoor",
-          caption: "Outdoor",
-          dataType: "boolean",
-        },
-        {
-          key: "id",
-          dataField: "description",
-          caption: "Descrizione",
-          dataType: "string",
-        },
-        {
-          key: "id",
-          dataField: "createdBy",
-          caption: "Creato da",
-          dataType: "string",
-          lookup: {
-            dataSource: person,
-            valueExpr: "id",
-            displayExpr: getFullName,
-          },
-        },
-        {
-          key: "id",
-          dataField: "enabled",
-          caption: "Abilitato",
-          dataType: "boolean",
-        },
-      ],
-    },
-  };
 
   return (
     <React.Fragment>
       <div className={"content-block flex-container"}>
         <h2>Machines</h2>
         <div className={"flex-container-row"}>
-        <div className={"flex-container-column"}>
-        <p> open sidebar </p>
-          <Button
-            icon={sidebar === 500 ? "chevronnext" : "pinright"}
-            label={sidebar === 500 ? "Close sidebar" : "Open sidebar"}
-            onClick={openSidebar}
-          ></Button>
-        </div>
-        <div className={"flex-container-column"}>
-        <p> add row </p>
-        <Button name="Add Row" icon="plus" onClick={addRow}></Button>
-
-        </div>
           <div className={"flex-container-column"}>
-        <p> delete row</p>
-        <Button name="Add Row" icon="delete" onClick={deleteRow}></Button>
-
-        </div>
+            <p> open sidebar </p>
+            <Button
+              icon={sidebar === 500 ? "chevronnext" : "pinright"}
+              label={sidebar === 500 ? "Close sidebar" : "Open sidebar"}
+              onClick={openSidebar}
+            ></Button>
+          </div>
           <div className={"flex-container-column"}>
-        <p> close popup </p>
-        <Button name="notify" icon="menu" onClick={togglePopup}></Button>
+            <p> add row </p>
+            <Button name="Add Row" icon="plus" onClick={addRow}></Button>
 
-        </div>
-        <div className={"flex-container-column"}>
-        <p> edit row </p>
-        <Button name="Add Row" icon="edit" onClick={editRow}></Button>
+          </div>
+          <div className={"flex-container-column"}>
+            <p> delete row</p>
+            <Button name="Add Row" icon="delete" onClick={deleteRow}></Button>
 
-        </div>
+          </div>
+          <div className={"flex-container-column"}>
+            <p> close popup </p>
+            <Button name="notify" icon="menu" onClick={togglePopup}></Button>
+
+          </div>
+          <div className={"flex-container-column"}>
+            <p> edit row </p>
+            <Button name="Add Row" icon="edit" onClick={editRow}></Button>
+
+          </div>
 
 
         </div>
       </div>
       <div className={"content-block content-overlay"}>
         <div className={"dx-card responsive-paddings"}>
-            <div>
-                <Popup
-                    title="Add new test Type"
-                    showTitle={true}
-                    contentRender={popUpForm}
-                    visible={isPopupVisible}
-                    width={500}
-                    // closeOnOutsideClick={true}
-                />
-            </div>
+          <div>
+            <Popup
+              title="Add new test Type"
+              showTitle={true}
+              contentRender={PopupForm}
+              visible={isPopupVisible}
+              width={500}
+            // closeOnOutsideClick={true}
+            />
+          </div>
           <DataGrid
             id="grid"
             dataSource={data}
@@ -238,7 +227,7 @@ function App(props) {
             focusedRowEnabled={true}
             onFocusedRowChanged={onFocusedRowChanged}
             onSelectionChanged={selectionChangedHandler}
-            
+
           >
             <StateStoring
               enabled={true}
@@ -254,12 +243,12 @@ function App(props) {
             <Selection mode="single" />
             <Editing mode="popup" maxWidth="300px" >
               <Texts confirmDeleteMessage="are you sure to delete?" />
-            </Editing>            
-            {datapages.machines.main.map((attribute) => {
+            </Editing>
+            {datapages.machines.main.map((attribute, index) => {
               return (
                 <Column
                   alignment="left"
-                  key={attribute.key ? attribute.key : null}
+                  key={attribute.dataField ? attribute.dataField : `key_${index}`}
                   dataField={attribute.dataField}
                   caption={
                     attribute.caption ? attribute.caption : attribute.dataField
