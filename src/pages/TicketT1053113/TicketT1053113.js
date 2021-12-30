@@ -4,7 +4,6 @@ import handlerGrid from "../HandlerData.js";
 import 'devextreme-react/tag-box'
 import {useCallback, useState, useMemo } from "react";
 import React from 'react';
-
 import { Button } from "devextreme-react/button";
 import TagBoxContent from "../TagBoxContent.js";
 import { List } from 'devextreme-react/list';
@@ -40,6 +39,9 @@ import { SpeedDialAction } from 'devextreme-react/speed-dial-action';
 import { SelectBox } from 'devextreme-react/select-box';
 import { TagBox } from 'devextreme-react/tag-box';
 
+
+//! toggle render ticket 
+import FieldTagbox from './ToggleRender';
 const optionDirections = ['auto', 'up', 'down'];
 
 function LogsInfo(item) {
@@ -261,7 +263,13 @@ function App(props) {
               <ItemPanel title="Stats">
               </ItemPanel>
               <ItemPanel title="Capabilities">    
-                <TagBox dataSource={testTypes} valueExpr='id' displayExpr='name' readOnly={true} value={objectSidebarData.TestTypes} />
+                <TagBox dataSource={testTypes} 
+                        valueExpr='id' 
+                        displayExpr='name' 
+                        readOnly={true} 
+                        value={objectSidebarData.TestTypes} 
+                        fieldRender={FieldTagbox}/>
+                        
               </ItemPanel>
               <ItemPanel title="Logs" badge="new">                
                   <List
