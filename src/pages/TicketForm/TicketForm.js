@@ -39,6 +39,8 @@ import TextArea from "devextreme-react/text-area";
 import { SpeedDialAction } from "devextreme-react/speed-dial-action";
 import { SelectBox } from "devextreme-react/select-box";
 import { TagBox } from "devextreme-react/tag-box";
+import { CustomContext, editDataReducer } from "../../utils/editFormState.js";
+
 const testTypesEditorOptions = {
   dataSource: testTypes,
   valueExpr: "name",
@@ -48,6 +50,7 @@ const testTypesEditorOptions = {
 const getFullName = (row) => {
   return `${row.firstName} ${row.lastName}`;
 };
+
 const datapages = {
   machines: {
     main: [
@@ -84,35 +87,37 @@ const datapages = {
     ],
   },
 };
+
+
 const notesEditorOptions = { height: 100 };
 
-  function cellTemplate(container, options) {
-    const noBreakSpace = "\u00A0";
-    const text = (options.value || [])
-      .map((element) => options.column.lookup.calculateCellValue(element))
-      .join(", ");
-    container.textContent = text || noBreakSpace;
-    container.title = text;
-  }
+function cellTemplate(container, options) {
+  const noBreakSpace = "\u00A0";
+  const text = (options.value || [])
+    .map((element) => options.column.lookup.calculateCellValue(element))
+    .join(", ");
+  container.textContent = text || noBreakSpace;
+  container.title = text;
+}
 
- 
 
-  function calculateFilterExpression(
-    filterValue,
-    selectedFilterOperation,
-    target
-  ) {
-    if (target === "search" && typeof filterValue === "string") {
-      return [this.dataField, "contains", filterValue];
-    }
-    return function (data) {
-      return (data.TestTypes || []).indexOf(filterValue) !== -1;
-    };
+function calculateFilterExpression(
+  filterValue,
+  selectedFilterOperation,
+  target
+) {
+  if (target === "search" && typeof filterValue === "string") {
+    return [this.dataField, "contains", filterValue];
   }
+  return function (data) {
+    return (data.TestTypes || []).indexOf(filterValue) !== -1;
+  };
+}
+
 
 function App(props) {
   const [data, setData] = React.useState(testTypes);
-  const [objectSidebarData, setObjectSidebarData] = React.useState({});
+  const [objectSidebarData, setObjectSidebarData] = React.useReducer(editDataReducer, {});
   const [selectedRowIndex, setSelectedRowIndex] = React.useState(-1);
   const [focusedRowKey, setFocusedRowKey] = React.useState(-1);
   const [grid, setGrid] = React.useState(null);
@@ -120,7 +125,7 @@ function App(props) {
 
   const selectionChangedHandler = useCallback((e) => {
     setSelectedRowIndex(e.component.getRowIndexByKey(e.selectedRowKeys[0]));
-    
+
     sidebar === 0 && setSidebar(500);
   }, [setSelectedRowIndex, sidebar]);
 
@@ -130,16 +135,16 @@ function App(props) {
 
   const togglePopup = useCallback(() => {
     setPopupVisibility(!isPopupVisible);
-  }, [setPopupVisibility, isPopupVisible]);
+  }, [isPopupVisible]);
 
-  // const popUpForm = useCallback(() => {
-  //   return (
-  //   );
-  // }, [objectSidebarData]);
-
+  const initialState = {
+    objectSidebarData,
+    togglePopup,
+    setObjectSidebarData
+  }
 
   const onFocusedRowChanged = useCallback((e) => {
-    e.row && setObjectSidebarData(e.row.data);
+    e.row && setObjectSidebarData({ value: e.row.data, type: 'change' });
     // localStorage.setItem('focusedMachine', JSON.stringify(e.row.data));
     console.log(objectSidebarData);
   }, [objectSidebarData, setObjectSidebarData]);
@@ -164,7 +169,7 @@ function App(props) {
     grid.instance.deselectAll();
   };
 
-  
+
 
 
   return (
@@ -191,7 +196,7 @@ function App(props) {
 
           </div>
           <div className={"flex-container-column"}>
-            <p> close popup </p>
+            <p> Open\close popup </p>
             <Button name="notify" icon="menu" onClick={togglePopup}></Button>
 
           </div>
@@ -206,87 +211,89 @@ function App(props) {
       </div>
       <div className={"content-block content-overlay"}>
         <div className={"dx-card responsive-paddings"}>
-          <div>
-            <Popup
-              title="Add new test Type"
-              showTitle={true}
-              contentRender={PopupForm}
-              visible={isPopupVisible}
-              width={500}
-            // closeOnOutsideClick={true}
-            />
-          </div>
-          <DataGrid
-            id="grid"
-            dataSource={data}
-            keyExpr="id"
-            ref={(ref) => {
-              setGrid(ref);
-            }}
-            showBorders={true}
-            focusedRowEnabled={true}
-            onFocusedRowChanged={onFocusedRowChanged}
-            onSelectionChanged={selectionChangedHandler}
+        <CustomContext.Provider value={initialState} >
+            <div>
+              <Popup
+                title="Add new test Type"
+                showTitle={true}
+                contentComponent={PopupForm}
+                visible={isPopupVisible}
+                width={500}
+              />
+            </div>
+            <DataGrid
+              id="grid"
+              dataSource={data}
+              keyExpr="id"
+              ref={(ref) => {
+                setGrid(ref);
+              }}
+              showBorders={true}
+              focusedRowEnabled={true}
+              onFocusedRowChanged={onFocusedRowChanged}
+              onSelectionChanged={selectionChangedHandler}
 
-          >
-            <StateStoring
-              enabled={true}
-              type="localStorage"
-              storageKey="machines_grid"
-            />
+            >
+              <StateStoring
+                enabled={true}
+                type="localStorage"
+                storageKey="machines_grid"
+              />
 
-            <FilterRow visible={true} />
-            <FilterPanel visible={true} />
-            <FilterBuilderPopup position={filterBuilderPopupPosition} />
-            <HeaderFilter visible={true} />
-            <SearchPanel visible={true} />
-            <Selection mode="single" />
-            <Editing mode="popup" maxWidth="300px" >
-              <Texts confirmDeleteMessage="are you sure to delete?" />
-            </Editing>
-            {datapages.machines.main.map((attribute, index) => {
-              return (
-                <Column
-                  alignment="left"
-                  key={attribute.dataField ? attribute.dataField : `key_${index}`}
-                  dataField={attribute.dataField}
-                  caption={
-                    attribute.caption ? attribute.caption : attribute.dataField
-                  }
-                  allowSorting={
-                    attribute.allowSorting ? attribute.allowSorting : null
-                  }
-                  customizeText={
-                    attribute.customizeColumnText
-                      ? attribute.customizeColumnText
-                      : null
-                  }
-                  dataType={attribute.dataType ? attribute.dataType : null}
-                >
-                  {attribute.lookup ? (
-                    <Lookup
-                      dataSource={
-                        attribute.lookup.dataSource
-                          ? attribute.lookup.dataSource
-                          : null
-                      }
-                      valueExpr={
-                        attribute.lookup.valueExpr
-                          ? attribute.lookup.valueExpr
-                          : null
-                      }
-                      displayExpr={
-                        attribute.lookup.displayExpr
-                          ? attribute.lookup.displayExpr
-                          : null
-                      }
-                    />
-                  ) : null}
-                </Column>
-              );
-            })}
-          </DataGrid>
+              <FilterRow visible={true} />
+              <FilterPanel visible={true} />
+              <FilterBuilderPopup position={filterBuilderPopupPosition} />
+              <HeaderFilter visible={true} />
+              <SearchPanel visible={true} />
+              <Selection mode="single" />
+              <Editing mode="popup" maxWidth="300px" >
+                <Texts confirmDeleteMessage="are you sure to delete?" />
+              </Editing>
+              {datapages.machines.main.map((attribute, index) => {
+                return (
+                  <Column
+                    alignment="left"
+                    key={attribute.dataField ? attribute.dataField : `key_${index}`}
+                    dataField={attribute.dataField}
+                    caption={
+                      attribute.caption ? attribute.caption : attribute.dataField
+                    }
+                    allowSorting={
+                      attribute.allowSorting ? attribute.allowSorting : null
+                    }
+                    customizeText={
+                      attribute.customizeColumnText
+                        ? attribute.customizeColumnText
+                        : null
+                    }
+                    dataType={attribute.dataType ? attribute.dataType : null}
+                  >
+                    {attribute.lookup ? (
+                      <Lookup
+                        dataSource={
+                          attribute.lookup.dataSource
+                            ? attribute.lookup.dataSource
+                            : null
+                        }
+                        valueExpr={
+                          attribute.lookup.valueExpr
+                            ? attribute.lookup.valueExpr
+                            : null
+                        }
+                        displayExpr={
+                          attribute.lookup.displayExpr
+                            ? attribute.lookup.displayExpr
+                            : null
+                        }
+                      />
+                    ) : null}
+                  </Column>
+                );
+              })}
+            </DataGrid>
+          </CustomContext.Provider>
         </div>
+
       </div>
     </React.Fragment>
   );
