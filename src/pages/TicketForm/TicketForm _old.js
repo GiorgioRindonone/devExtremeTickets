@@ -1,9 +1,9 @@
-import React, { useMemo, useReducer, useCallback, useState, } from 'react';
-
 import { machines, directions, states, testTypes, person } from "../data.js";
-
 import handlerGrid from "../HandlerData.js";
 import "devextreme-react/tag-box";
+import { useCallback, useState, useMemo } from "react";
+import React from "react";
+import PopupForm from "./PopupForm.js";
 import { Button } from "devextreme-react/button";
 import DataGrid, {
   Column,
@@ -20,42 +20,10 @@ import DataGrid, {
   Form as FormGird,
   Popup as PopupGrid,
 } from "devextreme-react/data-grid";
-
-//UPDATES 
-import { Popup, ToolbarItem } from 'devextreme-react/popup';
-import { Form, SimpleItem } from 'devextreme-react/form';
-import { RequiredRule, } from 'devextreme-react/validator';
-import DataSource from 'devextreme/data/data_source';
-import ArrayStore from 'devextreme/data/array_store';
-
-//! FORM PERSONALIZED UPDATE
-import PopupForm from "./PopupForm.js";
-
-//! REDUCER AND CONTEXT UPDATE
+import {
+  Popup
+} from 'devextreme-react/popup';
 import { CustomContext, editDataReducer } from "../../utils/editFormState.js";
-
-
-// UPDATE CREATESTORE SECTION
-const key = "id";
-const customerStore = new ArrayStore({
-  data: person,
-  key: key
-}),
-  gridSource = new DataSource({
-    store: customerStore
-  })
-
-// UPDATE REF FORM SECTION
-const formRef = React.createRef(),
-  getForm = () => {
-    return formRef.current.instance;
-  }
-
-const initPopupState = {
-  formData: {},
-  popupVisible: false,
-  popupMode: ""
-}
 
 const testTypesEditorOptions = {
   dataSource: testTypes,
@@ -63,11 +31,47 @@ const testTypesEditorOptions = {
   displayExpr: "Name",
   readOnly: true,
 };
-
-// Function to get the full name of the person in column
 const getFullName = (row) => {
   return `${row.firstName} ${row.lastName}`;
 };
+
+const datapages = {
+  machines: {
+    main: [
+      {
+        dataField: "name",
+        caption: "Name",
+        dataType: "string",
+      },
+      {
+        dataField: "outdoor",
+        caption: "Outdoor",
+        dataType: "boolean",
+      },
+      {
+        dataField: "description",
+        caption: "Descrizione",
+        dataType: "string",
+      },
+      {
+        dataField: "createdBy",
+        caption: "Creato da",
+        dataType: "string",
+        lookup: {
+          dataSource: person,
+          valueExpr: "id",
+          displayExpr: getFullName,
+        },
+      },
+      {
+        dataField: "enabled",
+        caption: "Abilitato",
+        dataType: "boolean",
+      },
+    ],
+  },
+};
+
 
 const notesEditorOptions = { height: 100 };
 
@@ -79,6 +83,7 @@ function cellTemplate(container, options) {
   container.textContent = text || noBreakSpace;
   container.title = text;
 }
+
 
 function calculateFilterExpression(
   filterValue,
@@ -93,16 +98,14 @@ function calculateFilterExpression(
   };
 }
 
+
 function App(props) {
-  
   const [data, setData] = React.useState(testTypes);
   const [objectSidebarData, setObjectSidebarData] = React.useReducer(editDataReducer, {});
   const [selectedRowIndex, setSelectedRowIndex] = React.useState(-1);
   const [focusedRowKey, setFocusedRowKey] = React.useState(-1);
   const [grid, setGrid] = React.useState(null);
   const [sidebar, setSidebar] = React.useState(0);
-  // REDUCER POPUP UPDATE
-  const [{formData, popupVisible, popupMode}, dispatchPopup] = useReducer(popupReducer, initPopupState);
 
   const selectionChangedHandler = useCallback((e) => {
     setSelectedRowIndex(e.component.getRowIndexByKey(e.selectedRowKeys[0]));
@@ -111,6 +114,7 @@ function App(props) {
   }, [setSelectedRowIndex, sidebar]);
 
   //! POPOUP SECTION 
+
   const [isPopupVisible, setPopupVisibility] = useState(false);
 
   const togglePopup = useCallback(() => {
@@ -122,34 +126,6 @@ function App(props) {
     togglePopup,
     setObjectSidebarData
   }
-
-  // UPDATE POPUP SECTION
-function cancelClick(e) {
-  dispatchPopup({type: "hidePopup"})
-}
-
-function showPopup(popupMode, data) {
-  dispatchPopup({type: "initPopup", data, popupMode})
-}
-
-function onHiding() {
-  dispatchPopup({type: "hidePopup"});
-}
-
-function confirmClick(e) {
-  let result = getForm().validate();
-  if (result.isValid) {
-    if (popupMode === "Add")
-      customerStore.push([{ type: "insert", data: formData }]);
-    else if (popupMode === "Edit") 
-      customerStore.push([{type: "update", data: formData, key: formData[key]}]);
-
-    dispatchPopup({type: "hidePopup"})
-    gridSource.reload();
-  }
-}
-
-  //! 
 
   const onFocusedRowChanged = useCallback((e) => {
     e.row && setObjectSidebarData({ value: e.row.data, type: 'change' });
@@ -174,14 +150,25 @@ function confirmClick(e) {
 
   const addRow = () => {
     grid.instance.addRow();
-    grid.instance.deselectAll();    
+    grid.instance.deselectAll();
   };
+
+
+
 
   return (
     <React.Fragment>
       <div className={"content-block flex-container"}>
         <h2>Machines</h2>
         <div className={"flex-container-row"}>
+          <div className={"flex-container-column"}>
+            <p> open sidebar </p>
+            <Button
+              icon={sidebar === 500 ? "chevronnext" : "pinright"}
+              label={sidebar === 500 ? "Close sidebar" : "Open sidebar"}
+              onClick={openSidebar}
+            ></Button>
+          </div>
           <div className={"flex-container-column"}>
             <p> add row </p>
             <Button name="Add Row" icon="plus" onClick={addRow}></Button>
@@ -200,6 +187,7 @@ function confirmClick(e) {
           <div className={"flex-container-column"}>
             <p> edit row </p>
             <Button name="Add Row" icon="edit" onClick={editRow}></Button>
+
           </div>
 
 
@@ -207,7 +195,7 @@ function confirmClick(e) {
       </div>
       <div className={"content-block content-overlay"}>
         <div className={"dx-card responsive-paddings"}>
-          <CustomContext.Provider value={initialState} >
+        <CustomContext.Provider value={initialState} >
             <div>
               <Popup
                 title="Add new test Type"
@@ -302,59 +290,4 @@ const filterBuilderPopupPosition = {
   offset: { y: 10 },
 };
 
-const datapages = {
-  machines: {
-    main: [
-      {
-        dataField: "name",
-        caption: "Name",
-        dataType: "string",
-      },
-      {
-        dataField: "outdoor",
-        caption: "Outdoor",
-        dataType: "boolean",
-      },
-      {
-        dataField: "description",
-        caption: "Descrizione",
-        dataType: "string",
-      },
-      {
-        dataField: "createdBy",
-        caption: "Creato da",
-        dataType: "string",
-        lookup: {
-          dataSource: person,
-          valueExpr: "id",
-          displayExpr: getFullName,
-        },
-      },
-      {
-        dataField: "enabled",
-        caption: "Abilitato",
-        dataType: "boolean",
-      },
-    ],
-  },
-};
-
 export default App;
-
-
-function popupReducer(state, action) {
-  switch(action.type) {
-    case "initPopup":
-      return {
-        formData: action.data,
-        popupVisible: true,
-        popupMode: action.popupMode
-      }
-    case "hidePopup":
-      return {
-        popupVisible: false
-      }
-    default: 
-      break;
-  }
-}

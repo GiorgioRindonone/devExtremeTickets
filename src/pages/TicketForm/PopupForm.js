@@ -18,6 +18,7 @@ function PopupForm(props) {
                 <SimpleItem dataField="name" colSpan={2} />
                 <SimpleItem dataField="description" colSpan={3} />
             </Form>
+            
         </div>
     )
 }
