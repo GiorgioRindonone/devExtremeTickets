@@ -29,10 +29,12 @@ import DataSource from 'devextreme/data/data_source';
 import ArrayStore from 'devextreme/data/array_store';
 
 //! FORM PERSONALIZED UPDATE
-import PopupForm from "./PopupForm.js";
+// import PopupForm from "./PopupForm.js";
 
 //! REDUCER AND CONTEXT UPDATE
 import { CustomContext, editDataReducer } from "../../utils/editFormState.js";
+
+//! POP UP NEW TEST
 
 
 // UPDATE CREATESTORE SECTION
@@ -94,23 +96,34 @@ function calculateFilterExpression(
 }
 
 function App(props) {
-  
+
   const [data, setData] = React.useState(testTypes);
   const [objectSidebarData, setObjectSidebarData] = React.useReducer(editDataReducer, {});
   const [selectedRowIndex, setSelectedRowIndex] = React.useState(-1);
-  const [focusedRowKey, setFocusedRowKey] = React.useState(-1);
+  // const [focusedRowKey, setFocusedRowKey] = React.useState(-1);
   const [grid, setGrid] = React.useState(null);
   const [sidebar, setSidebar] = React.useState(0);
-  // REDUCER POPUP UPDATE
-  const [{formData, popupVisible, popupMode}, dispatchPopup] = useReducer(popupReducer, initPopupState);
 
+  // REDUCER POPUP UPDATE
+  const [{ formData, popupVisible, popupMode }, dispatchPopup] = useReducer(popupReducer, initPopupState);
+
+
+  // SELECTION HANDLERS
   const selectionChangedHandler = useCallback((e) => {
     setSelectedRowIndex(e.component.getRowIndexByKey(e.selectedRowKeys[0]));
-
     sidebar === 0 && setSidebar(500);
   }, [setSelectedRowIndex, sidebar]);
 
-  //! POPOUP SECTION 
+  const onFocusedRowChanged = useCallback((e) => {
+    e.row && setObjectSidebarData({ value: e.row.data, type: 'change' });
+    // localStorage.setItem('focusedMachine', JSON.stringify(e.row.data));
+    console.log(objectSidebarData);
+  }, [objectSidebarData, setObjectSidebarData]);
+
+
+
+
+  // POPOUP SECTION 
   const [isPopupVisible, setPopupVisibility] = useState(false);
 
   const togglePopup = useCallback(() => {
@@ -119,62 +132,73 @@ function App(props) {
 
   const initialState = {
     objectSidebarData,
+    selectedRowIndex,
     togglePopup,
     setObjectSidebarData
   }
 
-  // UPDATE POPUP SECTION
-function cancelClick(e) {
-  dispatchPopup({type: "hidePopup"})
-}
-
-function showPopup(popupMode, data) {
-  dispatchPopup({type: "initPopup", data, popupMode})
-}
-
-function onHiding() {
-  dispatchPopup({type: "hidePopup"});
-}
-
-function confirmClick(e) {
-  let result = getForm().validate();
-  if (result.isValid) {
-    if (popupMode === "Add")
-      customerStore.push([{ type: "insert", data: formData }]);
-    else if (popupMode === "Edit") 
-      customerStore.push([{type: "update", data: formData, key: formData[key]}]);
-
-    dispatchPopup({type: "hidePopup"})
-    gridSource.reload();
+  // UPDATE POPUP 
+  function cancelClick(e) {
+    dispatchPopup({ type: "hidePopup" })
   }
-}
 
-  //! 
+  function showPopup(popupMode, data) {
+    dispatchPopup({ type: "initPopup", data, popupMode })
+  }
 
-  const onFocusedRowChanged = useCallback((e) => {
-    e.row && setObjectSidebarData({ value: e.row.data, type: 'change' });
-    // localStorage.setItem('focusedMachine', JSON.stringify(e.row.data));
-    console.log(objectSidebarData);
-  }, [objectSidebarData, setObjectSidebarData]);
+  function onHiding() {
+    dispatchPopup({ type: "hidePopup" });
+  }
 
+  function confirmClick(e) {
+    let result = getForm().validate();
+    if (result.isValid) {
+      if (popupMode === "Add")
+        customerStore.push([{ type: "insert", data: formData }]);
+      else if (popupMode === "Edit")
+        customerStore.push([{ type: "update", data: formData, key: formData[key] }]);
+
+      dispatchPopup({ type: "hidePopup" })
+      gridSource.reload();
+    }
+  }
+
+  const confirmBtnOptions = useMemo(() => {
+    console.log("updated confirmbtnOptions")
+    return {
+      text: 'Confirm',
+      type: 'success',
+      onClick: confirmClick
+    }
+  }, [formData]);
+
+  const cancelBtnOptions = useMemo(() => {
+    return {
+      text: 'Cancel',
+      onClick: cancelClick
+    }
+  }, []);
+
+
+  // CRUD grid buttons
   const openSidebar = () => {
-    console.log(focusedRowKey);
+    console.log(selectedRowIndex);
     sidebar === 500 ? setSidebar(0) : setSidebar(500);
   };
 
   const editRow = () => {
-    grid.instance.editRow(focusedRowKey);
+    grid.instance.editRow(selectedRowIndex);
     grid.instance.deselectAll();
   };
 
   const deleteRow = () => {
-    grid.instance.deleteRow(focusedRowKey);
+    grid.instance.deleteRow(selectedRowIndex);
     grid.instance.deselectAll();
   };
 
   const addRow = () => {
     grid.instance.addRow();
-    grid.instance.deselectAll();    
+    grid.instance.deselectAll();
   };
 
   return (
@@ -209,13 +233,14 @@ function confirmClick(e) {
         <div className={"dx-card responsive-paddings"}>
           <CustomContext.Provider value={initialState} >
             <div>
-              <Popup
+              {/* OLD POPUP */}
+              {/* <Popup
                 title="Add new test Type"
                 showTitle={true}
                 contentComponent={PopupForm}
                 visible={isPopupVisible}
                 width={500}
-              />
+              /> */}
             </div>
             <DataGrid
               id="grid"
@@ -242,7 +267,14 @@ function confirmClick(e) {
               <HeaderFilter visible={true} />
               <SearchPanel visible={true} />
               <Selection mode="single" />
-              <Editing mode="popup" maxWidth="300px" >
+              <Editing 
+                mode="popup"
+                maxWidth="300px" 
+                // allowUpdating={true}
+                // allowAdding={true}
+                // allowDeleting={true}
+                useIcons={true}
+              >
                 <Texts confirmDeleteMessage="are you sure to delete?" />
               </Editing>
               {datapages.machines.main.map((attribute, index) => {
@@ -287,9 +319,43 @@ function confirmClick(e) {
                 );
               })}
             </DataGrid>
+            <Popup
+              title={popupMode}
+              closeOnOutsideClick={true}
+              visible={popupVisible}
+              onHiding={onHiding}>
+              <ToolbarItem
+                widget="dxButton"
+                location="after"
+                toolbar="bottom"
+                options={confirmBtnOptions}
+              />
+              <ToolbarItem
+                widget="dxButton"
+                location="after"
+                toolbar="bottom"
+                options={cancelBtnOptions}
+              />
+              <Form
+                ref={formRef}
+                formData={formData}
+                labelLocation="top"
+                showColonAfterLabel={true}
+              // colCountByScreen={colCountByScreen}
+              >
+                <SimpleItem dataField="id">
+                  <RequiredRule />
+                </SimpleItem>
+                <SimpleItem dataField="name">
+                  <RequiredRule />
+                </SimpleItem>
+                <SimpleItem dataField="description">
+                  <RequiredRule />
+                </SimpleItem>
+              </Form>
+            </Popup>
           </CustomContext.Provider>
         </div>
-
       </div>
     </React.Fragment>
   );
@@ -339,11 +405,8 @@ const datapages = {
   },
 };
 
-export default App;
-
-
 function popupReducer(state, action) {
-  switch(action.type) {
+  switch (action.type) {
     case "initPopup":
       return {
         formData: action.data,
@@ -354,7 +417,11 @@ function popupReducer(state, action) {
       return {
         popupVisible: false
       }
-    default: 
+    default:
       break;
   }
 }
+
+export default App;
+
+
