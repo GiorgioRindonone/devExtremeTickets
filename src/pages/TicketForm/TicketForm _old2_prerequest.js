@@ -27,7 +27,6 @@ import { Form, SimpleItem } from 'devextreme-react/form';
 import { RequiredRule, } from 'devextreme-react/validator';
 import DataSource from 'devextreme/data/data_source';
 import ArrayStore from 'devextreme/data/array_store';
-import CustomStore from 'devextreme/data/custom_store';
 
 //! FORM PERSONALIZED UPDATE
 // import PopupForm from "./PopupForm.js";
@@ -36,7 +35,6 @@ import CustomStore from 'devextreme/data/custom_store';
 import { CustomContext, editDataReducer } from "../../utils/editFormState.js";
 
 //! POP UP NEW TEST
-
 
 
 // UPDATE CREATESTORE SECTION
@@ -269,9 +267,9 @@ function App(props) {
               <HeaderFilter visible={true} />
               <SearchPanel visible={true} />
               <Selection mode="single" />
-              <Editing
+              <Editing 
                 mode="popup"
-                maxWidth="300px"
+                maxWidth="300px" 
                 // allowUpdating={true}
                 // allowAdding={true}
                 // allowDeleting={true}

@@ -1,5 +1,5 @@
 import { machines, directions, states, testTypes, person } from "../data.js";
-import handlerGrid from "../HandlerData.js";
+import handlerGrid from "../handlerData.js";
 import "devextreme-react/tag-box";
 import { useCallback, useState, useMemo } from "react";
 import React from "react";

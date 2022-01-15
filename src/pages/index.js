@@ -3,3 +3,4 @@ export { default as ticket1Page } from './ticket1Page/ticket1Page';
 export { default as TasksPage } from './tasks/tasks';
 export { default as TicketT1053113 } from './TicketT1053113/TicketT1053113';
 export { default as TicketForm } from './TicketForm/TicketForm';
+export { default as GridCRUD } from './GridCRUD/GridCRUD';

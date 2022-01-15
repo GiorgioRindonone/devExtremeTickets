@@ -19,6 +19,10 @@ export const navigation = [
       {
         text: 'TicketForm',
         path: '/TicketForm'
+      },
+      {
+        text: 'GridCRUD',
+        path: '/GridCRUD'
       }
     ]
   }
