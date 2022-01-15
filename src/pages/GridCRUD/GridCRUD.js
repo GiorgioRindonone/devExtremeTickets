@@ -1,6 +1,4 @@
-import './gridCRUD.scss';
-
-//! UNCOMMENT THIS TO MAKE IT LIKE BEFORE
+import './Machines.scss';
 import {
     // machines, 
     directions,
@@ -12,14 +10,11 @@ import {
     // companies, 
     // machineVariables 
 } from "../data.js";
-
-
-
 // import { datapages } from "../structurePages.js"
 import handlerGrid from "../handlerData.js";
 import 'devextreme-react/tag-box'
-import { useCallback, useState, useMemo } from "react";
-import React from 'react';
+import React, { useCallback, useState, useMemo } from "react";
+
 import { Switch } from 'devextreme-react/switch';
 import { TagBox } from 'devextreme-react/tag-box';
 import { Button } from "devextreme-react/button";
@@ -34,6 +29,7 @@ import {
     Column as TreeListColumn,
 } from 'devextreme-react/tree-list';
 import DataGrid, {
+    RemoteOperations,
     Column,
     Editing,
     Lookup,
@@ -57,118 +53,342 @@ import { SpeedDialAction } from 'devextreme-react/speed-dial-action';
 import { SelectBox } from 'devextreme-react/select-box';
 import { FieldTagbox } from "../FieldTagbox.js";
 import CustomStore from 'devextreme/data/custom_store';
+import 'whatwg-fetch';
 
 const optionDirections = ['auto', 'up', 'down'];
 
-//setted the url cause if i put like https://192.168.1.32:8080/ it will return https://192.168.1.32:8080/machines/https://192.168.1.32:8080/machines I DON T KNOW WHY
-const URL = '';
-//! COMMENT THIS TO USE THE data.js
-// call API
-const sendRequest = (url, method = 'GET', data = {}) => {
+const URL = 'https://192.168.1.32:8080';
 
-    if (method === 'GET') {
-        return fetch(url, {
-            method,
-            credentials: 'include',
-        }).then((result) => result.json().then((json) => {
-            if (result.ok) return json.data;
-            throw json.Message;
-        }));
+// chiamate API
+// const sendRequest = (url, method = 'GET', data = {}) => {
+
+//   if (method === 'GET') {
+//     return fetch(url, {
+//       method,
+//       credentials: 'include',
+//     }).then((result) => result.json().then((json) => {
+//       if (result.ok) return json.data;
+//       throw json.Message;
+//     }));
+//   }
+
+//   const params = Object.keys(data).map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`).join('&');
+
+//   return fetch(url, {
+//     method,
+//     body: params,
+//     headers: {
+//       'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+//     },
+//     credentials: 'include',
+//   }).then((result) => {
+//     if (result.ok) {
+//       return result.text().then((text) => text && JSON.parse(text));
+//     }
+//     return result.json().then((json) => {
+//       throw json.Message;
+//     });
+//   });
+// }
+
+function handleErrors(response) {
+    if (!response.ok) {
+        throw Error(response.statusText);
     }
-
-    const params = Object.keys(data).map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`).join('&');
-
-    return fetch(url, {
-        method,
-        body: params,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        },
-        credentials: 'include',
-    }).then((result) => {
-        if (result.ok) {
-            return result.text().then((text) => text && JSON.parse(text));
-        }
-        return result.json().then((json) => {
-            throw json.Message;
-        });
-    });
+    return response;
 }
-
+function handledata(response) {
+    if (!response.ok) {
+        throw Error(response.statusText);
+    }
+    return response;
+}
 // machines 
 // testTypes
 //// tests
 // companies
 // machineVariables
+// const machines = new DataSource({
+//   store: employeesStore,
+// });
 
 const machines = new CustomStore({
-    key: 'id',
-    // loadMode: 'raw',
-    load: () => sendRequest(`${URL}/machines`),
-    insert: (values) => sendRequest(`${URL}/machines`, 'POST', {
-        values: JSON.stringify(values),
-    }),
-    update: (key, values) => sendRequest(`${URL}/machines?id[eq]=${key}`, 'PUT', {
-        key,
-        values: JSON.stringify(values),
-    }),
-    remove: (key) => sendRequest(`${URL}/machines?id[eq]=${key}`, 'DELETE', {
-        key,
-    }),
+    key: 'ID',
+    load: () => {
+        return fetch(`/machines`, {
+            method: 'GET',
+            // body: JSON.stringify(),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(handleErrors)
+            .then(response => response.json())
+            .then(response => {
+                return {
+                    data: response.data
+                };
+            })
+            .then(handledata)
+            .catch(() => { throw 'Network error', console.log("get toppata") });
+    },
+    insert: (values) => {
+        return fetch(`/machines`, {
+            method: 'POST',
+            body: JSON.stringify(values),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(handleErrors)
+            .catch(() => { throw 'Network error', console.log("post toppata") });
+    },
+    remove: (key) => {
+        return fetch(`/machines?id[eq]=${key}`, {
+            method: 'DELETE'
+        })
+            .then(handleErrors)
+            .catch(() => { throw 'Network error', console.log("delete toppata") });
+    },
+    update: (key, values) => {
+        return fetch(`/machines?id[eq]=${key}`, {
+            method: 'PATCH',
+            body: JSON.stringify(values),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(handleErrors)
+            .catch(() => { throw 'Network error', console.log("patch toppata") });
+    },
+    byKey: (key) => {
+        return fetch(`/machines?id[eq]=${key}`)
+            .then(handleErrors);
+    }
 });
+
+
+// const machinesArray = new ArrayStore({
+//   key: 'id',
+//   // loadMode: 'raw',
+//   load: () => sendRequest(`${URL}/machines`),
+//   insert: (values) => sendRequest(`${URL}/machines`, 'POST', {
+//     values: JSON.stringify(values),
+//   }),
+//   update: (key, values) => sendRequest(`${URL}/machines?id[eq]=${key}`, 'PUT', {
+//     key,
+//     values: JSON.stringify(values),
+//   }),
+//   remove: (key) => sendRequest(`${URL}/machines?id[eq]=${key}`, 'DELETE', {
+//     key,
+//   }),
+// });
 
 // const machines = new DataSource({
 //   store: machinesArray,
 // });
 
+// const machineVariables = new CustomStore({
+//   key: 'id',
+//   // loadMode: 'raw',
+//   load: () => sendRequest(`${URL}/machine-variables`),
+//   insert: (values) => sendRequest(`${URL}/machine-variables`, 'POST', {
+//     values: JSON.stringify(values),
+//   }),
+//   update: (key, values) => sendRequest(`${URL}/machine-variables?id[eq]=${key}`, 'PUT', {
+//     key,
+//     values: JSON.stringify(values),
+//   }),
+//   remove: (key) => sendRequest(`${URL}/machine-variables?id[eq]=${key}`, 'DELETE', {
+//     key,
+//   }),
+// });
+
 const machineVariables = new CustomStore({
     key: 'id',
-    // loadMode: 'raw',
-    load: () => sendRequest(`${URL}/machine-variables`),
-    insert: (values) => sendRequest(`${URL}/machine-variables`, 'POST', {
-        values: JSON.stringify(values),
-    }),
-    update: (key, values) => sendRequest(`${URL}/machine-variables?id[eq]=${key}`, 'PUT', {
-        key,
-        values: JSON.stringify(values),
-    }),
-    remove: (key) => sendRequest(`${URL}/machine-variables?id[eq]=${key}`, 'DELETE', {
-        key,
-    }),
+    load: () => {
+        return fetch(`/machine-variables`, {
+            method: 'GET',
+            body: JSON.stringify(),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(handleErrors)
+            .then(response => response.json())
+            .then(response => {
+                return {
+                    data: response.data,
+                };
+            })
+
+            .catch(() => { throw 'Network error', console.log("get toppata") });
+    },
+    insert: (values) => {
+        return fetch(`/machine-variables`, {
+            method: 'POST',
+            body: JSON.stringify(values),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(handleErrors)
+            .catch(() => { throw 'Network error', console.log("post toppata") });
+    },
+    remove: (key) => {
+        return fetch(`/machine-variables?id[eq]=${key}`, {
+            method: 'DELETE'
+        })
+            .then(handleErrors)
+            .catch(() => { throw 'Network error', console.log("delete toppata") });
+    },
+    update: (key, values) => {
+        return fetch(`/machine-variables?id[eq]=${key}`, {
+            method: 'PATCH',
+            body: JSON.stringify(values),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(handleErrors)
+            .catch(() => { throw 'Network error', console.log("patch toppata") });
+    }
 });
+
+
 
 const testTypes = new CustomStore({
     key: 'id',
-    loadMode: 'raw',
-    load: () => sendRequest(`${URL}/test-types`),
-    insert: (values) => sendRequest(`${URL}/test-types`, 'POST', {
-        values: JSON.stringify(values),
-    }),
-    update: (key, values) => sendRequest(`${URL}/test-types?id[eq]=${key}`, 'PUT', {
-        key,
-        values: JSON.stringify(values),
-    }),
-    remove: (key) => sendRequest(`${URL}/test-types?id[eq]=${key}`, 'DELETE', {
-        key,
-    }),
+    load: () => {
+        return fetch(`/test-types`, {
+            method: 'GET',
+            body: JSON.stringify(),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(handleErrors)
+            .then(response => response.json())
+            .then(response => {
+                return {
+                    data: response.data,
+                };
+            })
+            .catch(() => { throw 'Network error', console.log("get toppata") });
+    },
+    insert: (values) => {
+        return fetch(`/test-types`, {
+            method: 'POST',
+            body: JSON.stringify(values),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(handleErrors)
+            .catch(() => { throw 'Network error', console.log("post toppata") });
+    },
+    remove: (key) => {
+        return fetch(`/test-types?id[eq]=${key}`, {
+            method: 'DELETE'
+        })
+            .then(handleErrors)
+            .catch(() => { throw 'Network error', console.log("delete toppata") });
+    },
+    update: (key, values) => {
+        return fetch(`/test-types?id[eq]=${key}`, {
+            method: 'PATCH',
+            body: JSON.stringify(values),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(handleErrors)
+            .catch(() => { throw 'Network error', console.log("patch toppata") });
+    }
 });
-
 
 const companies = new CustomStore({
     key: 'id',
-    loadMode: 'raw',
-    load: () => sendRequest(`${URL}/companies`),
-    insert: (values) => sendRequest(`${URL}/companies`, 'POST', {
-        values: JSON.stringify(values),
-    }),
-    update: (key, values) => sendRequest(`${URL}/companies?id[eq]=${key}`, 'PUT', {
-        key,
-        values: JSON.stringify(values),
-    }),
-    remove: (key) => sendRequest(`${URL}/companies?id[eq]=${key}`, 'DELETE', {
-        key,
-    }),
+    load: () => {
+        return fetch(`/companies`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(handleErrors)
+            .then(response => response.json())
+            .then(response => {
+                return {
+                    data: response.data,
+                };
+            })
+            .catch(() => { throw 'Network error', console.log("get toppata") });
+    },
+    insert: (values) => {
+        return fetch(`/companies`, {
+            method: 'POST',
+            body: JSON.stringify(values),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(handleErrors)
+            .catch(() => { throw 'Network error', console.log("post toppata") });
+    },
+    remove: (key) => {
+        return fetch(`/companies?id[eq]=${key}`, {
+            method: 'DELETE'
+        })
+            .then(handleErrors)
+            .catch(() => { throw 'Network error', console.log("delete toppata") });
+    },
+    update: (key, values) => {
+        return fetch(`/companies?id[eq]=${key}`, {
+            method: 'PATCH',
+            body: JSON.stringify(values),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(handleErrors)
+            .catch(() => { throw 'Network error', console.log("patch toppata") });
+    }
 });
+
+
+// const testTypes = new CustomStore({
+//   key: 'id',
+//   loadMode: 'raw',
+//   load: () => sendRequest(`${URL}/test-types`),
+//   insert: (values) => sendRequest(`${URL}/test-types`, 'POST', {
+//     values: JSON.stringify(values),
+//   }),
+//   update: (key, values) => sendRequest(`${URL}/test-types?id[eq]=${key}`, 'PUT', {
+//     key,
+//     values: JSON.stringify(values),
+//   }),
+//   remove: (key) => sendRequest(`${URL}/test-types?id[eq]=${key}`, 'DELETE', {
+//     key,
+//   }),
+// });
+
+
+// const companies = new CustomStore({
+//   key: 'id',
+//   loadMode: 'raw',
+//   load: () => sendRequest(`${URL}/companies`),
+//   insert: (values) => sendRequest(`${URL}/companies`, 'POST', {
+//     values: JSON.stringify(values),
+//   }),
+//   update: (key, values) => sendRequest(`${URL}/companies?id[eq]=${key}`, 'PUT', {
+//     key,
+//     values: JSON.stringify(values),
+//   }),
+//   remove: (key) => sendRequest(`${URL}/companies?id[eq]=${key}`, 'DELETE', {
+//     key,
+//   }),
+// });
 
 
 
@@ -176,6 +396,8 @@ const companies = new CustomStore({
 
 
 // render logs per machines
+
+
 function LogsInfo(item) {
     return (
         <React.Fragment>
@@ -192,13 +414,13 @@ function LogsInfo(item) {
     );
 }
 
-const store = new ArrayStore({
-    key: 'name',
-    data: machines.TestTypes
-});
+// const store = new ArrayStore({
+//   key: 'name',
+//   data: machines.TestTypes
+// });
 
 function App(props) {
-    const [data, setData] = React.useState(machines);
+    const [data, setData] = React.useState();
     const [objectSidebarData, setObjectSidebarData] = React.useState({});
     const [selectedRowIndex, setSelectedRowIndex] = React.useState(-1);
     const [focusedRowKey, setFocusedRowKey] = React.useState(-1);
@@ -266,12 +488,6 @@ function App(props) {
                     dataField: 'name',
                     caption: 'Name',
                     dataType: 'string',
-                    visible: true,
-                },
-                {
-                    dataField: 'year',
-                    caption: 'Data di creazione',
-                    dataType: 'date',
                     visible: true,
                 },
                 {
@@ -677,18 +893,10 @@ const filterBuilderPopupPosition = {
     my: "top",
     offset: { y: 10 },
 };
+
 export default App;
 
 
-// problem one: the API CALL is not working and the data isn't loaded
-// problem two: in the tagbox in line 565 i can't unrderstand why if i pass the same  fieldRender={FieldTagbox} as in the one at 524, it doesn't work and crash...
-// problem three: the back end is telling me different errors.
-
-// [ERR_HTTP_HEADERS_SENT]: cannot remove headers after they are sent to the client... what does it means?
-// another error is: unhandlepromisedrejectionwarning: unhandled promise rejection.
-// the last one in console log,: uncaught (in promise) TypeError
-// another one is W1011 - The "keyExpre" option is not applied when datasource is not an array -.... i've tried to check online this thing but i didn't fix
-// the data structure is the same i reproduced in the file data.js  so i can't understand what's the problem... 
 
 
 
