@@ -37,8 +37,6 @@ import { CustomContext, editDataReducer } from "../../utils/editFormState.js";
 
 //! POP UP NEW TEST
 
-
-
 // UPDATE CREATESTORE SECTION
 const key = "id";
 const customerStore = new ArrayStore({
@@ -345,7 +343,7 @@ function App(props) {
                 showColonAfterLabel={true}
               // colCountByScreen={colCountByScreen}
               >
-                <SimpleItem dataField="id">
+                {/* <SimpleItem dataField="id">
                   <RequiredRule />
                 </SimpleItem>
                 <SimpleItem dataField="name">
@@ -353,7 +351,7 @@ function App(props) {
                 </SimpleItem>
                 <SimpleItem dataField="description">
                   <RequiredRule />
-                </SimpleItem>
+                </SimpleItem> */}
               </Form>
             </Popup>
           </CustomContext.Provider>

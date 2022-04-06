@@ -23,6 +23,10 @@ export const navigation = [
       {
         text: 'GridCRUD',
         path: '/GridCRUD'
+      },
+      {
+        text: 'CrudProblem2',
+        path: '/CrudProblem2'
       }
     ]
   }

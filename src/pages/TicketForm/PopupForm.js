@@ -16,7 +16,7 @@ function PopupForm(props) {
             <Form colCount={4} formData={objectSidebarData}>
                 <SimpleItem dataField="id" colSpan={1} />
                 <SimpleItem dataField="name" colSpan={2} />
-                <SimpleItem dataField="description" colSpan={3} />
+                
             </Form>
             
         </div>

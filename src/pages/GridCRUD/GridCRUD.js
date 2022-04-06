@@ -1,4 +1,5 @@
-import './Machines.scss';
+import './gridCRUD.scss';
+import axios from 'axios';
 import {
     // machines, 
     directions,
@@ -97,12 +98,11 @@ function handleErrors(response) {
     }
     return response;
 }
-function handledata(response) {
-    if (!response.ok) {
-        throw Error(response.statusText);
-    }
-    return response;
+function handledata(data) {
+
+    return console.log(data);
 }
+
 // machines 
 // testTypes
 //// tests
@@ -111,18 +111,44 @@ function handledata(response) {
 // const machines = new DataSource({
 //   store: employeesStore,
 // });
+const loginData = {
+    email: 'admin@admin.admin',
+    password: 'admin'
+};
 
 const machines = new CustomStore({
-    key: 'ID',
-    load: () => {
-        return fetch(`/machines`, {
-            method: 'GET',
-            // body: JSON.stringify(),
+    key: '_id',
+    // loadMode: "raw",
+    load: async () => {
+        await axios.post(`http://192.168.1.32:3000/login`, loginData, {
+            // credentials: 'include',
+            // cache: 'default',
+
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+
             }
         })
-            .then(handleErrors)
+            .then(response => {
+                var hsts = response.headers.get("strict-transport-security"),
+                    csp = response.headers.get("content-security-policy")
+                console.log(hsts, csp)
+            })
+            .catch((eroor) => { console.log(eroor); throw eroor });
+        await axios.get(`http://192.168.1.32:3000/login/machines`,
+            {
+                //     method: 'GET',
+                //     body: JSON.stringify(),
+                // credentials: 'omit',
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        )
+            // .then(handleErrors)
+            // .then(response => response.json())
+            .then(response => console.log(response))
             .then(response => response.json())
             .then(response => {
                 return {
@@ -130,10 +156,10 @@ const machines = new CustomStore({
                 };
             })
             .then(handledata)
-            .catch(() => { throw 'Network error', console.log("get toppata") });
+            .catch((error) => { console.log(error); throw error });
     },
     insert: (values) => {
-        return fetch(`/machines`, {
+        return fetch(`https://crudcrud.com/api/85a774e2b9b54e34b261f8a6c22c6f51/machines`, {
             method: 'POST',
             body: JSON.stringify(values),
             headers: {
@@ -141,17 +167,17 @@ const machines = new CustomStore({
             }
         })
             .then(handleErrors)
-            .catch(() => { throw 'Network error', console.log("post toppata") });
+            .catch(((error) => { console.log(error); throw error }));
     },
     remove: (key) => {
-        return fetch(`/machines?id[eq]=${key}`, {
+        return fetch(`https://crudcrud.com/api/85a774e2b9b54e34b261f8a6c22c6f51/machines/${key}`, {
             method: 'DELETE'
         })
             .then(handleErrors)
-            .catch(() => { throw 'Network error', console.log("delete toppata") });
+            .catch((error) => { console.log(error); throw error });
     },
     update: (key, values) => {
-        return fetch(`/machines?id[eq]=${key}`, {
+        return fetch(`https://crudcrud.com/api/85a774e2b9b54e34b261f8a6c22c6f51/machines/${key}`, {
             method: 'PATCH',
             body: JSON.stringify(values),
             headers: {
@@ -159,14 +185,15 @@ const machines = new CustomStore({
             }
         })
             .then(handleErrors)
-            .catch(() => { throw 'Network error', console.log("patch toppata") });
+            .catch((error) => { console.log(error); throw error });
     },
     byKey: (key) => {
-        return fetch(`/machines?id[eq]=${key}`)
+        return fetch(`https://crudcrud.com/api/85a774e2b9b54e34b261f8a6c22c6f51/machines/${key}`)
             .then(handleErrors);
     }
 });
 
+console.log(machines);
 
 // const machinesArray = new ArrayStore({
 //   key: 'id',
@@ -204,25 +231,26 @@ const machines = new CustomStore({
 //   }),
 // });
 
+
 const machineVariables = new CustomStore({
-    key: 'id',
+    key: '_ip',
     load: () => {
         return fetch(`/machine-variables`, {
             method: 'GET',
-            body: JSON.stringify(),
+            // body: JSON.stringify(),
             headers: {
                 'Content-Type': 'application/json'
             }
         })
             .then(handleErrors)
-            .then(response => response.json())
+            //            .then(response => response.json())
             .then(response => {
                 return {
                     data: response.data,
                 };
             })
 
-            .catch(() => { throw 'Network error', console.log("get toppata") });
+            .catch((error) => { console.log(error); throw error });
     },
     insert: (values) => {
         return fetch(`/machine-variables`, {
@@ -233,14 +261,14 @@ const machineVariables = new CustomStore({
             }
         })
             .then(handleErrors)
-            .catch(() => { throw 'Network error', console.log("post toppata") });
+            .catch((error) => { console.log(error); throw error });
     },
     remove: (key) => {
         return fetch(`/machine-variables?id[eq]=${key}`, {
             method: 'DELETE'
         })
             .then(handleErrors)
-            .catch(() => { throw 'Network error', console.log("delete toppata") });
+            .catch((error) => { console.log(error); throw error });
     },
     update: (key, values) => {
         return fetch(`/machine-variables?id[eq]=${key}`, {
@@ -251,7 +279,7 @@ const machineVariables = new CustomStore({
             }
         })
             .then(handleErrors)
-            .catch(() => { throw 'Network error', console.log("patch toppata") });
+            .catch(((error) => { console.log(error); throw error }));
     }
 });
 
@@ -268,13 +296,13 @@ const testTypes = new CustomStore({
             }
         })
             .then(handleErrors)
-            .then(response => response.json())
+            // .then(response => response.json())
             .then(response => {
                 return {
-                    data: response.data,
+                    data: response.body,
                 };
             })
-            .catch(() => { throw 'Network error', console.log("get toppata") });
+            .catch((error) => { console.log(error); throw error });
     },
     insert: (values) => {
         return fetch(`/test-types`, {
@@ -285,14 +313,14 @@ const testTypes = new CustomStore({
             }
         })
             .then(handleErrors)
-            .catch(() => { throw 'Network error', console.log("post toppata") });
+            .catch((error) => { console.log(error); throw error });
     },
     remove: (key) => {
         return fetch(`/test-types?id[eq]=${key}`, {
             method: 'DELETE'
         })
             .then(handleErrors)
-            .catch(() => { throw 'Network error', console.log("delete toppata") });
+            .catch((error) => { console.log(error); throw error });
     },
     update: (key, values) => {
         return fetch(`/test-types?id[eq]=${key}`, {
@@ -303,7 +331,7 @@ const testTypes = new CustomStore({
             }
         })
             .then(handleErrors)
-            .catch(() => { throw 'Network error', console.log("patch toppata") });
+            .catch(((error) => { console.log(error); throw error }));
     }
 });
 
@@ -317,13 +345,13 @@ const companies = new CustomStore({
             }
         })
             .then(handleErrors)
-            .then(response => response.json())
+            // .then(response => response.json())
             .then(response => {
                 return {
                     data: response.data,
                 };
             })
-            .catch(() => { throw 'Network error', console.log("get toppata") });
+            .catch((error) => { console.log(error); throw error });
     },
     insert: (values) => {
         return fetch(`/companies`, {
@@ -334,14 +362,14 @@ const companies = new CustomStore({
             }
         })
             .then(handleErrors)
-            .catch(() => { throw 'Network error', console.log("post toppata") });
+            .catch(((error) => { console.log(error); throw error }));
     },
     remove: (key) => {
         return fetch(`/companies?id[eq]=${key}`, {
             method: 'DELETE'
         })
             .then(handleErrors)
-            .catch(() => { throw 'Network error', console.log("delete toppata") });
+            .catch((error) => { console.log(error); throw error });
     },
     update: (key, values) => {
         return fetch(`/companies?id[eq]=${key}`, {
@@ -352,7 +380,7 @@ const companies = new CustomStore({
             }
         })
             .then(handleErrors)
-            .catch(() => { throw 'Network error', console.log("patch toppata") });
+            .catch(((error) => { console.log(error); throw error }));
     }
 });
 
