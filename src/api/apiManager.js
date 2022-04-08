@@ -75,6 +75,8 @@ export async function getObject(what, key, customEndPoint, primaryKey) {
 
 //POST
 export async function postObject(what, values, customEndPoint) {
+  //create a const to save the response data
+  const response = {};
   return await api.post(`${URL}/${what}${customEndPoint ? customEndPoint : ''}`, values)
     .then((response) => {
     //   toast.success(`Success insert for ${what}`);

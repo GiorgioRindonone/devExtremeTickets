@@ -27,7 +27,12 @@ export const navigation = [
       {
         text: 'CrudProblem2',
         path: '/CrudProblem2'
+      },
+      {
+        text: 'Advanced Form and Grid',
+        path: '/advancedform'
       }
+
     ]
   }
   ];
