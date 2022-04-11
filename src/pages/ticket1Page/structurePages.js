@@ -1,5 +1,5 @@
 import { states } from "./data.js";
-import handlerGrid from "./HandlerData.js";
+import HandlerGrid from "./HandlerData.js";
 
 export const datapages={
     machines:{
@@ -29,7 +29,7 @@ export const datapages={
                 dataField: 'TestTypes',
                 caption: 'Test Types',
                 allowSorting: 'false',
-                customizeColumnText: handlerGrid,
+                customizeColumnText: HandlerGrid,
             },
             {
                 dataField: 'ip',
