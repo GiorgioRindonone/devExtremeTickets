@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from './contexts/auth';
 import { useScreenSizeClass } from './utils/media-query';
 import Content from './Content';
 import UnauthenticatedContent from './UnauthenticatedContent';
+import { SidebarDataProvider, useSidebarData } from './contexts/SidebarDataContext';
 
 function App() {
   const { user, loading } = useAuth();
@@ -32,9 +33,11 @@ export default function Root() {
     <Router>
       <AuthProvider>
         <NavigationProvider>
-          <div className={`app ${screenSizeClass}`}>
-            <App />
-          </div>
+          <SidebarDataProvider>
+            <div className={`app ${screenSizeClass}`}>
+              <App />
+            </div>
+          </SidebarDataProvider>
         </NavigationProvider>
       </AuthProvider>
     </Router>

@@ -465,28 +465,43 @@ function App(props) {
 
   //sample tyres
 
-  const storeSampleTires = useCallback(() => {
-    return getSampleTires(gridBoxValue);
-  }, [gridBoxValue]);
+  // const storeSampleTires = useCallback(() => {
+  //   return getSampleTires(gridBoxValue);
+  // }, [gridBoxValue]);
 
-  const storeSampleTiresForm = useCallback(() => {
+  // const storeSampleTiresForm = useCallback(() => {
+  //   return getSampleTires(objectSidebarData.id);
+  // }, [gridBoxValue, objectSidebarData]);
+
+  // function getSampleTires(keyP) {
+  //   return new DataSource({
+  //     store: new CustomStore({
+  //       key: "id",
+  //       // loadMode: 'raw',
+  //       cacheRawData: true,
+  //       load: async (key) => await getObject("sample-tires", key),
+  //       update: async (key, values) => await patchObject("sample-tires", key, values),
+  //       remove: async (key) => await deleteObject("sample-tires", key),
+  //       insert: async (values) => await postObject("sample-tires", values),
+  //       byKey: async (key) => { return await getByKeyObject("sample-tires", key, "id") }
+  //     }),
+  //     filter: ['TireId', '=', keyP],
+  //   });
+  // }
+
+  const storeSampleTires = getSampleTires(objectSidebarData.id);
+  console.log("storesample", storeSampleTires._store._array);
+
+    const storeSampleTiresForm = useCallback(() => {
     return getSampleTires(objectSidebarData.id);
   }, [gridBoxValue, objectSidebarData]);
 
   function getSampleTires(keyP) {
-    return new DataSource({
-      store: new CustomStore({
-        key: "id",
-        // loadMode: 'raw',
-        cacheRawData: true,
-        load: async (key) => await getObject("sample-tires", key),
-        update: async (key, values) => await patchObject("sample-tires", key, values),
-        remove: async (key) => await deleteObject("sample-tires", key),
-        insert: async (values) => await postObject("sample-tires", values),
-        byKey: async (key) => { return await getByKeyObject("sample-tires", key, "id") }
-      }),
+    console.log("key", keyP);
+    return (new DataSource({
+      store: storeSampleTires,
       filter: ['TireId', '=', keyP],
-    });
+    }));
   }
 
 
@@ -514,26 +529,26 @@ function App(props) {
   }, [objectSidebarData]);
 
   //SAMPLE TIRES
-  useEffect(() => {
-    const key = objectSidebarData.id;
-    const obj = async (key) => await axios.get(`/sample-tires?TireId{eq}=${key}`)
-      .then((res) => {
-        setSelectedObject(res.data);
-        return res.data;
-      })
-      .catch(error => {
-        console.log(`error get`, error);
-      });
-    // console.log("selectedSamples", selectedObject);
-    if (objectSidebarData) {
-      setSelectedObject(obj(key));
-      // console.log("selectedSamples2", selectedObject);
-    } else {
-      setSelectedObject(null);
-    }
-    // console.log("selectedObject", selectedObject, typeof selectedObject);
+  // useEffect(() => {
+  //   const key = objectSidebarData.id ? objectSidebarData.id : null;
+  //   const obj = async (key) => await axios.get(`/sample-tires?TireId{eq}=${key}`)
+  //     .then((res) => {
+  //       setSelectedObject(res.data);
+  //       return res.data;
+  //     })
+  //     .catch(error => {
+  //       console.log(`error get`, error);
+  //     });
+  //   // console.log("selectedSamples", selectedObject);
+  //   if (objectSidebarData) {
+  //     setSelectedObject(obj(key));
+  //     // console.log("selectedSamples2", selectedObject);
+  //   } else {
+  //     setSelectedObject(null);
+  //   }
+  //   // console.log("selectedObject", selectedObject, typeof selectedObject);
 
-  }, [objectSidebarData]);
+  // }, [objectSidebarData]);
 
   useEffect(() => {
     if (selectedObject != null && selectedObject.length > 0) {
@@ -545,7 +560,6 @@ function App(props) {
           })}
         </div>)
       )
-
     } else {
       setMappedSelectedObject([]);
     }
@@ -907,7 +921,7 @@ function App(props) {
             selectedRowIndex={selectedRowIndex}
             editRow={editRow}
             deleteRow={deleteRow}
-            title={objectSidebarData.id ? objectSidebarData.id : "Select a Tire"}
+            // title={objectSidebarData.id ? objectSidebarData.id : "Select a Tire"}
           >
             <TabPanel className="tabpanel-sidebar">
               <ItemPanel title="General" >
@@ -1252,7 +1266,7 @@ function App(props) {
               showTitle={true}
               height="700"
               width="800"
-              closeOnOutsideClick={false}
+              closeOnOutsideClick={true}
               visible={popupVisible}
               onHiding={onHiding}>
               <FormForm>
