@@ -62,7 +62,7 @@ export default function SampleTiresTemplate(props) {
     const selectionChangedHandler = useCallback((e) => {
         // e.selectedRowsData[0] && setId(e.selectedRowsData[0].id);
 
-        // PROBLEM HERE 
+        // PROBLEM HERE 1
         // title: I can't take the right value from the selected row
         // 1) gridSelectId it gives me always -1 when i set it with e.component.getRowIndexByKey(e.selectedRowKeys[0]) maybe am i taking in the wrong method?
         // 2) should i use e.selectedRowKeys[0] or e.component.getRowIndexByKey(e.selectedRowKeys[0]) ? cause the first give me values, but the first row is 1, is it correst?
@@ -103,7 +103,7 @@ export default function SampleTiresTemplate(props) {
         // setEditState(false);
         grid2.current.instance.option("focusedRowIndex", -1);
 
-        //PROBLEM HERE 
+        //PROBLEM HERE 2
         // am i setting the default values in the right way for the new row?
         dispatchPopup({
             type: "initPopup",
@@ -144,7 +144,7 @@ export default function SampleTiresTemplate(props) {
         let result = getFormSide().validate();
         let store = storeSampleTiresMaster.store();
 
-        // PROBLEM HERE 
+        // PROBLEM HERE 3
         // title: i can't take the status of the popupMode from the reducer using the form      
         // 1) i can't take the popupMode anymore, i am having problem to take the popupMode from the popup reducer to do the insert and the update
         // 2) i think the reducer it's not working properly, cause i can't the the popupMode, so i can't do the insert or update
