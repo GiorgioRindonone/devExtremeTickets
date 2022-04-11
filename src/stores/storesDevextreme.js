@@ -464,7 +464,7 @@ export const storeBrands = new ArrayStore({
 const arrTires = [
     {
         "id": 1,
-        "status": 1,
+        "status": 4,
         "identifier": "identifier Test",
         "inflationPressure1": 2,
         "NominalRimId": 1,
