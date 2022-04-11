@@ -111,6 +111,7 @@ export default function SampleTiresTemplate(props) {
             type: "initPopup",
             data: {
                 ...formData,
+                ContactId: 1,
                 TireId: props.data.key,
             },
             popupMode: "Add"
@@ -245,7 +246,14 @@ export default function SampleTiresTemplate(props) {
     const formIdentifierOptions = {
         readOnly: true
     }
-
+    
+    const formContactOptions = {
+        dataSource: storeContacts,
+        valueExpr: 'id',
+        displayExpr: 'firstName',
+        // itemRender: renderName
+      }
+    
 
     return (
         <React.Fragment>
@@ -378,6 +386,11 @@ export default function SampleTiresTemplate(props) {
                             <SimpleItem colSpan={2} dataField="ExitTypeId" editorType="dxSelectBox" editorOptions={formExitTypesOptions} >
                                 <Label text={`Exit type`} />
                             </SimpleItem>
+
+                            <SimpleItem dataField="ContactId" editorType="dxSelectBox" editorOptions={formContactOptions} colSpan={2}>
+                      <Label text={`User Editor`} />
+                    </SimpleItem>
+
 
                             {/* <SimpleItem dataField="StorageId" editorType="dxSelectBox" colSpan={1} >
                                 <Label text={`Companies`} />

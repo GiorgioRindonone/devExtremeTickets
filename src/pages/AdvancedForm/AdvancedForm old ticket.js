@@ -5,6 +5,7 @@ import 'whatwg-fetch';
 /* 2. Standard module dependencies in brackets */
 import axios from 'axios';
 
+// import { useSidebarProvider } from "../../contexts/sidebardata.js";
 
 /* 3. Third party dependencies */
 import CustomStore from 'devextreme/data/custom_store';
@@ -36,9 +37,6 @@ import TextArea from "devextreme-react/text-area";
 import { SpeedDialAction } from 'devextreme-react/speed-dial-action';
 import { SelectBox } from 'devextreme-react/select-box';
 import { FieldTagbox } from "../FieldTagbox.js";
-import { Template } from 'devextreme-react/core/template';
-import TextBox from 'devextreme-react/text-box';
-import DropDownBox from 'devextreme-react/drop-down-box';
 /* 5. Internal component imports */
 import Sidebar from "../../components/sidebar/sidebar.js";
 /* 6. Internal components in brackets */
@@ -53,30 +51,25 @@ import {
   storeBrands,
   storeProducts,
   storeCompanies,
-  // storeSampleTires,
+  storeSampleTires,
   storeSampleTypes
 } from "../../stores/storesDevextreme.js";
 
 
 /* 7. Internal functions imports in brackets */
-import { SidebarDataProvider, useSidebarData } from "../../contexts/SidebarDataContext.js";
 
 // import {URL} from "../../api/apiManager.js";
 import { initPopupState, popupReducer, formRef, getForm, formRefSide, getFormSide } from "../../redux-store/reducers/popupForm.js";
 import { getObject, postObject, patchObject, deleteObject, getByKeyObject, getByKeyObjects } from "../../api/apiManager.js";
 import { timeConverter } from "../../utils/handler-functions.js";
-import { log } from "../../utils/consolelog.js";
 
 /* 8. Internal global variables imports in brackets */
 import SampleTiresTemplate from "./SampleTires/SampleTires.js";
-import StatusCell from "../../utils/StatusCell.js";
-
 /* 9. Internal components within same folder (Relative imports) */
 import { getGridStructure } from "./GridStructure.js";
 
 /* 10. Stylesheet import */
 import './Tires.scss';
-import { logDOM } from "@testing-library/react";
 
 /* 11. Data import */
 // import service from "./data.js";
@@ -135,7 +128,7 @@ const arrForm = [
     "ApplicationAcronym": "acr",
     "BrandName": "Brand",
     "ProductName": "Product",
-    "NominalRimId": 1,
+    "NominalRimId": 11,
     "TreadTypeName": null,
     "Size": {
       "name": "Size 1",
@@ -167,6 +160,7 @@ const arrForm = [
     "TreadType": null
   },
 ]
+
 const arrayTest = [
   {
     "id": 1,
@@ -177,7 +171,7 @@ const arrayTest = [
     "inflationPressure1": 22,
     "inflationPressure2": null,
     "plyrate": "22",
-    "tireStrength": 3,
+    "tireStrength": null,
     "additionalMarking": null,
     "loadRange": null,
     "TTTL": "Tubeless",
@@ -228,7 +222,7 @@ const arrayTest = [
     "inflationPressure1": 22,
     "inflationPressure2": null,
     "plyrate": "22",
-    "tireStrength": 2,
+    "tireStrength": null,
     "additionalMarking": null,
     "loadRange": null,
     "TTTL": "Tubeless",
@@ -274,29 +268,16 @@ const arrayTest = [
 
 ]
 
-const storeTest = new ArrayStore({
-  key: "id",
-  data: arrayTest
-});
+// const storeTestArray = new ArrayStore({
+//   key: "id",
+//   data: arrayTest
+// });
 
-function renderCatalogueForm(data) {
-  return (
-    <div className="custom-item-catalogue">
-      <div className="product-name">{data.SizeName + " " + data.BrandName + " " + data.ProductName}</div>
-    </div>
-  );
-}
+function renderAutocomplete(data) {
+  console.log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww", data);
+  return <p>{data.BrandName} </p>;
+};
 
-function fieldCatalogueForm(data) {
-  log("fieldCatalogueForm", data);
-  return (
-    <div className="custom-item-catalogue">
-      <TextBox className="product-name"
-        defaultValue={data && data.SizeName + " " + data.BrandName + " " + data.ProductName}
-        readOnly={true} />
-    </div>
-  );
-}
 
 const SampleTiresItem = (props) => {
   // const showInfo = () => props.showInfo(props.employee);
@@ -340,9 +321,9 @@ const SampleTiresItem = (props) => {
 };
 
 function App(props) {
+  // const { data, setNewSidebar, setRowIndex, index } = useSidebarProvider();
 
-  // const [objectSidebarData, setObjectData] = React.useState({});
-  const { objectSidebarData, setObjectData, sidebarMain, setSidebarMainStatus } = useSidebarData();
+  const [objectSidebarData, setObjectSidebarData] = React.useState({});
   const [selectedRowIndex, setSelectedRowIndex] = React.useState(-1);
   // const [focusedRowKey, setFocusedRowKey] = React.useState(-1);
   const [sidebar, setSidebar] = React.useState(0);
@@ -352,144 +333,26 @@ function App(props) {
   const [editState, setEditState] = React.useState(false);
   const [popUpType, setPopUpType] = React.useState("form");
 
+
   const [sampleTiresGridDisabled, setSampleTiresGridDisabled] = React.useState(true);
 
   const [{ formData, popupVisible, popupMode }, dispatchPopup] = useReducer(popupReducer, initPopupState)
 
-  const [dataFormGet, setDataFormGet] = React.useState({});
-  const [gridBoxValue, setGridBoxValue] = React.useState(null);
-  const [isGridBoxOpened, setIsGridBoxOpened] = React.useState(false);
 
+  const [idFromInsert, setIdFromInsert] = React.useState(null);
 
-  //grid selectbox
-  const gridColumns = ['SizeName', 'BrandName'];
+  // sample tires grid filtered array
 
-  let CataloguePermittedRims = [];
-
-  const syncDataGridSelection = (e) => {
-    // log("syncDataGridSelection from dropdown", e, e.value);
-    setGridBoxValue(e.value);
-    storeCatalogues.byKey(e.value).then(
-      (dataItem) => {
-        log("catalogue", dataItem);
-
-        // let prevRimPer = getObject("permitted-rims", dataItem.id, "", "CatalogueId");
-        // if (prevRimPer !== undefined) {
-        //   // rowData.CataloguePermittedRims = [];
-        //   for (let i = 0; i < prevRimPer.length; i++) {
-        //     //push prevRimPer.NominalRimId to CataloguePermittedRims
-        //     CataloguePermittedRims.push(prevRimPer[i].NominalRimId);
-        //   }
-        //   // console.log("permitted edit initialize", permittedRims, rowData);
-        // }    
-        dispatchPopup({
-          type: "updateFormData",
-          data: {
-            ...formData,
-            CatalogueId: dataItem.id,
-            // CataloguePermittedRims: CataloguePermittedRims,
-            SampleTypeAcronym: dataItem.SampleTypeAcronym,
-            SizeName: dataItem.SizeName,
-            ApplicationAcronym: dataItem.ApplicationAcronym,
-            BrandName: dataItem.BrandName,
-            ProductName: dataItem.ProductName,
-            LI1: dataItem.LI1,
-            SS1: dataItem.SS1,
-            inflationPressure: dataItem.inflationPressure1,
-            plyrate: dataItem.plyrate,
-            TTTL: dataItem.TTTL,
-            NominalRimId: dataItem.NominalRimId,
-            LI2: dataItem.LI2,
-            SS2: dataItem.SS2,
-            additionalMarking: dataItem.additionalMarking,
-            loadRange: dataItem.loadRange,
-            inflationPressure2: dataItem.inflationPressure2,
-            tireStrength: dataItem.tireStrength,
-            TreadTypeName: dataItem.TreadTypeName,
-            noteCatalogue: dataItem.note,
-          }
-        });
-        setDataFormGet(dataItem);
-
-      },
-      (error) => {
-        log("catalogue error", error);
-      }
-    );
-  };
-
-
-
-
-  const dataGridOnSelectionChanged = (e) => {
-    let value = e.selectedRowKeys[0];
-    setGridBoxValue(value);
-    setIsGridBoxOpened(false);
-    log("dataGridOnSelectionChanged from grid", gridBoxValue);
-  }
-
-  const gridBoxDisplayExpr = (item) => {
-    return item && `${item.SizeName} <Brand: ${item.BrandName} | Product: ${item.ProductName} >`;
-  }
-
-  const onGridBoxOpened = (e) => {
-    if (e.name === 'opened') {
-      setIsGridBoxOpened(e.value);
-    }
-  }
-
-
-  const dataGridRender = () => {
-    return (
-      <>
-        <DataGrid
-          dataSource={storeCatalogues}
-          hoverStateEnabled={true}
-          selectedRowKeys={gridBoxValue}
-          onSelectionChanged={dataGridOnSelectionChanged}
-          height="400px">
-          <Selection mode="single" />
-          <Scrolling mode="virtual" />
-          <FilterRow visible={true} />
-          <Column dataField="SizeName" caption="Size" />
-          <Column dataField="BrandName" caption="Brand" />
-          <Column dataField="ProductName" caption="Product" />
-          <Column dataField="ApplicationAcronym" caption="Application" >
-            <Lookup dataSource={storeApplications} valueExpr="acronym" displayExpr="name" />
-          </Column>
-        </DataGrid>
-
-      </>
-    );
-  }
-
-  //sample tyres
-
-  const storeSampleTires = useCallback(() => {
-    return getSampleTires(gridBoxValue);
-  }, [gridBoxValue]);
-
-  const storeSampleTiresForm = useCallback(() => {
-    return getSampleTires(objectSidebarData.id);
-  }, [gridBoxValue, objectSidebarData]);
+  const storeSampleTiresMaster = getSampleTires(objectSidebarData.id);
+  console.log("storesamplemaster", storeSampleTiresMaster._store._array);
 
   function getSampleTires(keyP) {
-    return new DataSource({
-      store: new CustomStore({
-        key: "id",
-        // loadMode: 'raw',
-        cacheRawData: true,
-        load: async (key) => await getObject("sample-tires", key),
-        update: async (key, values) => await patchObject("sample-tires", key, values),
-        remove: async (key) => await deleteObject("sample-tires", key),
-        insert: async (values) => await postObject("sample-tires", values),
-        byKey: async (key) => { return await getByKeyObject("sample-tires", key, "id") }
-      }),
+    console.log("key", keyP);
+    return (new DataSource({
+      store: storeSampleTires,
       filter: ['TireId', '=', keyP],
-    });
+    }));
   }
-
-
 
   //LOGS
   const storeLogs = new DataSource({
@@ -498,12 +361,11 @@ function App(props) {
   });
 
   const logsInfo = (itemData) => {
-
     const userName = storeContacts.__rawData.filter(item => item.id == itemData.user);
     // console.log("datasetted", userName);
     return <div className="log-span"><p><b>{userName && userName[0].firstName} {" "} {userName && userName[0].lastName}</b>  {itemData.action === "POST" ? "Created" : itemData.action === "PATCH" ? "Modified" : null} <b> {objectSidebarData.tireID && objectSidebarData.tireID} </b></p> <p>{timeConverter(itemData.timestamp) + " "} </p></div>;
-  };
 
+  };
 
   useEffect(() => {
     storeContacts.load();
@@ -516,18 +378,23 @@ function App(props) {
   //SAMPLE TIRES
   useEffect(() => {
     const key = objectSidebarData.id;
-    const obj = async (key) => await axios.get(`/sample-tires?TireId{eq}=${key}`)
-      .then((res) => {
-        setSelectedObject(res.data);
-        return res.data;
-      })
-      .catch(error => {
-        console.log(`error get`, error);
-      });
+    const storeSelected = getSampleTires(key)
+    const obj = storeSelected._store._array;
+    console.log("obj", obj, "storeSelected", storeSelected);
+
+    // const obj = async (key) => await axios.get(`/sample-tires?TireId{eq}=${key}`)
+    // .then((res) => {
+    //   setSelectedObject(res.data);
+    //   return res.data;
+    // })
+    // .catch(error => {
+    //   console.log(`error get`, error);
+    // });
     // console.log("selectedSamples", selectedObject);
     if (objectSidebarData) {
-      setSelectedObject(obj(key));
-      // console.log("selectedSamples2", selectedObject);
+      setSelectedObject(obj);
+      // setSelectedObject(obj(key));
+      console.log("selectedSamples2", selectedObject);
     } else {
       setSelectedObject(null);
     }
@@ -554,14 +421,13 @@ function App(props) {
 
   // GESTIONE GRID
   const selectionChangedHandler = useCallback((e) => {
-    e.selectedRowsData[0] && setObjectData(e.selectedRowsData[0])
-    setSidebarMainStatus(false);
+    e.selectedRowsData[0] && setObjectSidebarData(e.selectedRowsData[0])
     setSelectedRowIndex(e.component.getRowIndexByKey(e.selectedRowKeys[0]));
     sidebar === 0 && setSidebar(500);
   }, [selectedRowIndex, objectSidebarData]);
 
   const onFocusedRowChanged = (e) => {
-    // e.row && setObjectData(e.row.data);
+    // e.row && setObjectSidebarData(e.row.data);
     console.log("focused", objectSidebarData);
   };
 
@@ -570,54 +436,30 @@ function App(props) {
     sidebar === 500 ? setSidebar(0) : setSidebar(500);
   }, [sidebar, selectedRowIndex]);
 
-
-
   //! reducer edit and insert
-  const addRow = useCallback(() => {
 
+  const addRow = useCallback(() => {
     setSampleTiresGridDisabled(true);
     setPopUpType("form");
 
     setEditState(false);
+    grid.current.instance.option("focusedRowIndex", -1);
     dispatchPopup({
       type: "initPopup",
       data: {},
       popupMode: "Add"
     });
-
-    grid.current.instance.option("focusedRowIndex", -1);
   }, [grid]);
 
   const editRow = useCallback(() => {
     setSampleTiresGridDisabled(false);
     setPopUpType("form");
+
     setEditState(true);
     const rowData = grid.current.instance.getSelectedRowsData()[0];
-    setGridBoxValue(rowData.CatalogueId);
     dispatchPopup({
       type: "initPopup",
-      data: {
-        ...rowData,
-        year: rowData.Year,
-        SampleTypeAcronym: rowData.SampleTypeAcronym,
-        SizeName: rowData.Catalogue.SizeName,
-        ApplicationAcronym: rowData.Catalogue.ApplicationAcronym,
-        BrandName: rowData.Catalogue.BrandName,
-        ProductName: rowData.Catalogue.ProductName,
-        LI1: rowData.Catalogue.LI1,
-        SS1: rowData.Catalogue.SS1,
-        plyrate: rowData.Catalogue.plyrate,
-        TTTL: rowData.Catalogue.TTTL,
-        NominalRimId: rowData.NominalRimId,
-        LI2: rowData.Catalogue.LI2,
-        SS2: rowData.Catalogue.SS2,
-        additionalMarking: rowData.Catalogue.additionalMarking,
-        loadRange: rowData.Catalogue.loadRange,
-        inflationPressure2: rowData.Catalogue.inflationPressure2,
-        tireStrength: rowData.Catalogue.tireStrength,
-        TreadTypeName: rowData.Catalogue.TreadTypeName,
-        noteCatalogue: rowData.Catalogue.note,
-      },
+      data: rowData,
       popupMode: "Edit"
     })
     grid.current.instance.option("focusedRowIndex", selectedRowIndex);
@@ -625,41 +467,19 @@ function App(props) {
 
   function confirmClick(e) {
     let result = getForm().validate();
-    console.log("form before update", formData);
-    let option = getForm().option("formData");
-    console.log("option to update", option);
-    getForm().updateData(option);
-    console.log("after update form", result, formData, option);
-
-
     if (result.isValid) {
-      log("adddddddddddddddddddddddddddddddddddddddddddddddddd", popupMode);
-      storeTires.insert(option).then(() => {
+      if (popupMode === "Add") {
+        setSampleTiresGridDisabled(false);
         // cambio lo store con il nuovo oggetto
+        storeTires.insert(formData);
         grid.current.instance.refresh(true);
         // dispatchPopup({ type: "hidePopup" });
-      });
-      setSampleTiresGridDisabled(false);
-
-      if (popupMode === "Add") {
-        storeTires.insert(option).then(() => {
-          setSampleTiresGridDisabled(false);
-          // cambio lo store con il nuovo oggetto
-          grid.current.instance.refresh(true);
-          // dispatchPopup({ type: "hidePopup" });
-        });
-
       }
       else if (popupMode === "Edit") {
-        log("eeeeeeeeeeeeeeeeeeeeeeeeeeedddddddddddddddddddddddddddddddddddddddddddddddddd")
-
-        storeTires.update(objectSidebarData.id, option).then(() => {
-          grid.current.instance.refresh(true);
-          setSampleTiresGridDisabled(false);
-        });
-
+        setSampleTiresGridDisabled(false);
+        storeTires.update(objectSidebarData.id, formData);
         // storeContacts.reload();
-        // grid.current.instance.refresh(true);
+        grid.current.instance.refresh(true);
         // dispatchPopup({ type: "hidePopup" });
       }
     }
@@ -667,7 +487,6 @@ function App(props) {
 
   function closeClick(e) {
     setSampleTiresGridDisabled(true);
-    setGridBoxValue(null);
     dispatchPopup({ type: "hidePopup" });
   }
 
@@ -713,7 +532,7 @@ function App(props) {
   const deleteRow = useCallback(() => {
     grid.current.instance.deleteRow(selectedRowIndex);
     // grid.current.instance.deselectAll();
-    setObjectData({});
+    setObjectSidebarData({});
     grid.current.instance.option("focusedRowIndex", -1);
   }, [selectedRowIndex]);
 
@@ -768,74 +587,41 @@ function App(props) {
   // }
 
   const formDisabledOptions = {
-    readOnly: true,
+    readOnly: false,
   }
-
-  const formNominalRimsOptions2 = {
-    dataSource: storeNominalRims,
-    valueExpr: 'id',
-    displayExpr: 'name',
-  }
-
 
   const formNominalRimsOptions = {
     dataSource: storeNominalRims,
     valueExpr: 'id',
     displayExpr: 'name',
-    searchEnabled: true,
-    searchTimeout: 200,
-    minSearchLength: 2,
-    searchExpr: ["name"],
-    placeholder: 'Type to search...',
-    searchMode: 'contains',
-    showClearButton: true,
   }
 
   const formNoteOptions = {
     stylingMode: "outlined",
     autoResizeEnabled: true
   }
-  const formNoteOptions3 = {
-    stylingMode: "outlined",
-    autoResizeEnabled: false,
-    height: "80px"
+
+
+  const formCatalogueOptions = {
+    // dataSource: storeTest,
+    dataSource: storeCatalogues,
+    valueExpr: 'id',
+    // valueExpr: 'SizeName',
+    itemRender: { renderAutocomplete },
+    valueChangeEvent: 'change',
+    // searchTimeout: 1000,
+    searchExpr: ["SizeName"],
+    placeholder: "Type two symbols to search...",
+    hoverStateEnabled: true,
+    minSearchLength: 1,
+    openOnFieldClick: false,
+    showClearButton: true,
   }
 
-
-  // const formCatalogueOptions = {
-  //   dataSource: storeCatalogues,
-  //   valueExpr: 'id',
-  //   // valueExpr: 'SizeName' + ' ' + 'BrandName',
-  //   searchEnabled: true,
-  //   searchTimeout: 200,
-  //   minSearchLength: 1,
-  //   searchExpr: ["SizeName"],
-  //   placeholder: 'Type two symbols to search...',
-  //   searchMode: 'contains',
-  //   showClearButton: true,
-  //   // fieldRender: {fieldCatalogueForm},
-  //   itemRender: { renderCatalogueForm },
-  //   // fieldRender: {renderCatalogueForm},
-  // }
-
-  // const formCatalogueOptions2 = {
-  //   value: { gridBoxValue },
-  //   opened: { isGridBoxOpened },
-  //   valueExpr: "id",
-  //   deferRendering: false,
-  //   displayExpr: { gridBoxDisplayExpr },
-  //   placeholder: "Select a value...",
-  //   showClearButton: true,
-  //   dataSource: { storeCatalogues },
-  //   onValueChanged: { syncDataGridSelection },
-  //   onOptionChanged: { onGridBoxOpened },
-  //   contentRender: { dataGridRender },
-  // }
   const formCataloguePermittedOptions = {
     dataSource: storeNominalRims,
     valueExpr: 'id',
     displayExpr: 'name',
-    // value: CataloguePermittedRims,
     disabled: true,
   }
 
@@ -846,48 +632,41 @@ function App(props) {
     showClearButton: true
   }
 
-  const formApplicationAcronymOptions = {
-    dataSource: storeApplications,
-    valueExpr: 'acronym',
-    displayExpr: 'name',
-    disabled: true,
-  }
-
   //handle the field data change in form
   const onFieldDataChanged = useCallback((e) => {
-    log("onFieldDataChanged", e.value, gridBoxValue);
     if (e.dataField === "CatalogueId") {
-      // log("onFieldDataChanged", e.value, gridBoxValue);
-      // const catalogue = storeCatalogues.byKey(e.value);
-      // // const catalogue = arrForm[0];
-      // console.log("Before Dispatch", formData);
-      // console.log("storeCatalogues", catalogue);
+      console.log("CatalogueId changed", e.value);
+      const catalogue = storeCatalogues.byKey(e.value);
+      //  const catalogue = arrForm[0];  i need to filter the data from the catalogue using the id of the selection from the
+      console.log("storeCatalogues", catalogue);
+      console.log("before Dispatch", formData);
+
       // if (catalogue) {
-      //   dispatchPopup({
-      //     type: "updateFormData",
-      //     data: {
-      //       ...formData,            
-      //       CatalogueId: e.value,
-      //       SampleTypeAcronym: catalogue.SampleTypeAcronym,
-      //       SizeName: catalogue.SizeName,
-      //       ApplicationName: catalogue.ApplicationName,
-      //       BrandName: catalogue.BrandName,
-      //       ProdctName: catalogue.ProdctName,
-      //       LI1: catalogue.LI1,
-      //       SS1: catalogue.SS1,
-      //       inflationPressure: catalogue.inflationPressure,
-      //       plyrate: catalogue.plyrate,
-      //       TTTL: catalogue.TTTL,
-      //       NominalRimId: catalogue.NominalRimId,
-      //       LI2: catalogue.LI2,
-      //       SS2: catalogue.SS2,
-      //       additionalMarking: catalogue.additionalMarking,
-      //       loadRange: catalogue.loadRange,
-      //       inflationPressure2: catalogue.inflationPressure2,
-      //       tireStrength: catalogue.tireStrength,
-      //       TreadTypeName: catalogue.TreadTypeName,
-      //     },
-      //   });
+      dispatchPopup({
+        type: "updateFormData",
+        data: {
+          ...formData,
+          SizeName: catalogue.SizeName,
+          ApplicationName: catalogue.ApplicationName,
+          BrandName: catalogue.BrandName,
+          ProdctName: catalogue.ProdctName,
+          LI1: catalogue.LI1,
+          SS1: catalogue.SS1,
+          inflationPressure: catalogue.inflationPressure,
+          plyrate: catalogue.plyrate,
+          TTTL: catalogue.TTTL,
+          NominalRimId: catalogue.NominalRimId,
+          LI2: catalogue.LI2,
+          SS2: catalogue.SS2,
+          additionalMarking: catalogue.additionalMarking,
+          loadRange: catalogue.loadRange,
+          inflationPressure2: catalogue.inflationPressure2,
+          tireStrength: catalogue.tireStrength,
+          TreadTypeName: catalogue.TreadTypeName,
+        },
+      });
+      console.log("after dispatch", formData);
+
       // }
     }
   }, []);
@@ -907,37 +686,28 @@ function App(props) {
             selectedRowIndex={selectedRowIndex}
             editRow={editRow}
             deleteRow={deleteRow}
-            title={objectSidebarData.id ? objectSidebarData.id : "Select a Tire"}
+            title={objectSidebarData.identifier ? objectSidebarData.identifier : "Select a Tire"}
           >
             <TabPanel className="tabpanel-sidebar">
               <ItemPanel title="General" >
                 <div className="dx-scrollable-tabpanel-content">
                   <FormForm colCount={4} readOnly={true} formData={objectSidebarData}>
-                    <SimpleItem dataField="identifier" colSpan={2} disabled="true" >
+                    <SimpleItem dataField="TireID" colSpan={4} disabled="true" >
                       <Label text="Tire ID" />
                     </SimpleItem>
-                    <SimpleItem dataField="Catalogue.Size.name" colSpan={2}>
-                      <Label text={`Catalogue`} />
-                    </SimpleItem>
-                    <SimpleItem dataField="SampleTypeAcronym" editorType="dxSelectBox" editorOptions={formSampleTypeOptions} colSpan={2}>
-                      <Label text={`Sample type`} />
-                    </SimpleItem>
-                    <SimpleItem dataField="inflationPressure" colSpan={2} >
-                      <Label text={`Inflation Pressure`} />
-                    </SimpleItem>
-                    <SimpleItem dataField="year" colSpan={2}>
-                      <Label text={`Year`} />
-                    </SimpleItem>
-                    <SimpleItem dataField="NominalRimId" editorType="dxSelectBox" editorOptions={formNominalRimsOptions2} colSpan={2}>
-                      <Label text={`Nominal rim (according ETRTO, ECE ...)`} />
-                    </SimpleItem>
-                    <SimpleItem dataField="Catalogue.ProductName" editorOptions={formDisabledOptions} colSpan={2}>
-                    </SimpleItem>
-                    <SimpleItem dataField="Catalogue.BrandName" editorOptions={formDisabledOptions} colSpan={2}>
-                    </SimpleItem>
-
-                    <SimpleItem dataField="note" editorType="dxTextArea" editorOptions={formNoteOptions3} colSpan={4} >
-                      <Label text={`Note`} />
+                    <SimpleItem dataField="Company.name" colSpan={2} disabled="true" />
+                    <SimpleItem dataField="Size.identifier" colSpan={2} disabled="true" />
+                    <SimpleItem dataField="LI" disabled="true" colSpan={1} />
+                    <SimpleItem dataField="LI2" disabled="true" colSpan={1} />
+                    <SimpleItem dataField="SI" disabled="true" colSpan={1} />
+                    <SimpleItem dataField="SI2" disabled="true" colSpan={1} />
+                    <SimpleItem dataField="RC" disabled="true" colSpan={1} />
+                    <SimpleItem dataField="weight" disabled="true" colSpan={1} />
+                    <SimpleItem dataField="ECE" disabled="true" colSpan={1} />
+                    <SimpleItem dataField="year" disabled="true" colSpan={1} />
+                    <SimpleItem dataField="radialCrossPly" disabled="true" colSpan={2} />
+                    <SimpleItem dataField="TireType.acronym" disabled="true" colSpan={2} >
+                      <Label text="Tire Type" />
                     </SimpleItem>
                   </FormForm>
                 </div>
@@ -1002,10 +772,11 @@ function App(props) {
             id="grid-tires"
             dataSource={storeTires}
             ref={grid}
+            remoteOperations={true}
             showBorders={true}
-            // repaintChangesOnly={true}
-            // cacheEnabled={true}
-            height={'100%'}
+            repaintChangesOnly={true}
+            // focusedRowEnabled={true}
+            // onFocusedRowChanged={onFocusedRowChanged}
             onSelectionChanged={selectionChangedHandler}
           >
             <Scrolling rowRenderingMode='virtual'></Scrolling>
@@ -1038,29 +809,23 @@ function App(props) {
               }
               )
             }
-            <Column
+            {/* <Column
               dataField="status"
-              caption="Status"
+              caption="State"
               // dataType="number"
-              // format="step"
-              alignment="left"
+              // format="percent"
+              alignment="center"
               allowGrouping={false}
-              cellRender={StatusCell}
-              // cssClass="bullet"
-              allowFiltering={false}
-              allowSorting={false}
-              allowEditing={false}
-              allowSearch={false}
-            />
-
-
+              cellRender={DiscountCell}
+              cssClass="bullet"
+            /> */}
             <MasterDetail
               enabled={true}
               component={SampleTiresTemplate}
             // objectSidebarData={objectSidebarData}
             />
           </DataGrid>
-          {popUpType === "form" ?
+          {popUpType === "form" ? (
 
             <Popup
               title={editState == true ? "Editing " + objectSidebarData.tireID : "Add a Tire"}
@@ -1088,76 +853,33 @@ function App(props) {
                 ref={formRef}
                 // colCount={4}
                 formData={formData}
-                // onFieldDataChanged={onFieldDataChanged}
+                onFieldDataChanged={onFieldDataChanged}
                 labelLocation="top"
                 showColonAfterLabel={true}>
                 <TabbedItem>
                   <TabPanelOptions deferRendering={false} />
                   <Tab title="General" colCount={6}>
-                    <SimpleItem dataField="CatalogueId" colSpan={6}>
-                      <Label text={`Catalogue`} />
-                      <DropDownBox
-                        value={gridBoxValue}
-                        opened={isGridBoxOpened}
-                        valueExpr="id"
-                        deferRendering={false}
-                        displayExpr={gridBoxDisplayExpr}
-                        placeholder="Select a value..."
-                        showClearButton={true}
-                        dataSource={storeCatalogues}
-                        onValueChanged={syncDataGridSelection}
-                        onOptionChanged={onGridBoxOpened}
-                        contentRender={dataGridRender}
-                      />
-                    </SimpleItem>
-
-                    <SimpleItem dataField="SampleTypeAcronym" editorType="dxSelectBox" editorOptions={formSampleTypeOptions} colSpan={2}>
+                    <SimpleItem dataField="id" editorType="dxTextBox" editorOptions={formDisabledOptions} colSpan={1}>
+                      <Label text={`ID`} />
                       <RequiredRule message="Required" />
-                      <Label text={`Sample type`} />
                     </SimpleItem>
-                    <SimpleItem dataField="inflationPressure" colSpan={2} >
-                      <RequiredRule message="Required" />
-                      <PatternRule message="Only numbers Accepted" pattern="[0-9]+" />
-                      <Label text={`Inflation Pressure 1`} />
-                    </SimpleItem>
-                    <SimpleItem dataField="identifier" editorType="dxTextBox" editorOptions={formDisabledOptions} colSpan={2}>
+                    <SimpleItem dataField="identifier" editorType="dxTextBox" editorOptions={formDisabledOptions} colSpan={1}>
                       <Label text={`Tire ID`} />
                     </SimpleItem>
-                    <SimpleItem dataField="year" colSpan={2}>
-                      <RequiredRule message="Required" />
-                      <Label text={`Year`} />
-
+                    <SimpleItem dataField="SampleTypeAcronym" editorType="dxSelectBox" editorOptions={formSampleTypeOptions} colSpan={2}>
+                      <Label text={`Sample type`} />
                     </SimpleItem>
-
-                    <SimpleItem dataField="NominalRimId" editorType="dxSelectBox" editorOptions={formNominalRimsOptions} colSpan={4}>
-                      <RequiredRule message="Required" />
-
-                      <Label text={`Nominal rim (according ETRTO, ECE ...)`} />
+                    <SimpleItem dataField="CatalogueId" editorType="dxAutocomplete" editorOptions={formCatalogueOptions} colSpan={2}>
+                      <Label text={`Catalogue`} />
                     </SimpleItem>
-                    <SimpleItem dataField="CataloguePermittedRims" editorType="dxTagBox" editorOptions={formCataloguePermittedOptions} colSpan={6}>
-                      <Label text={`Permitted Rims`} />
-                    </SimpleItem>
-                    <SimpleItem dataField="note" editorType="dxTextArea" editorOptions={formNoteOptions} colSpan={6} >
-                      <Label text={`Note`} />
-                    </SimpleItem>
-
-                  </Tab>
-                  <Tab title="More Info" colCount={6}>
                     <SimpleItem dataField="SizeName" editorOptions={formDisabledOptions} colSpan={2}>
                       <Label text={`Size`} />
                     </SimpleItem>
-                    <SimpleItem dataField="ApplicationAcronym" editorOptions={formApplicationAcronymOptions} colSpan={2}>
+                    <SimpleItem dataField="ApplicationName" editorOptions={formDisabledOptions} colSpan={2}>
                       <Label text={`Application`} />
                     </SimpleItem>
                     <SimpleItem dataField="BrandName" editorOptions={formDisabledOptions} colSpan={2}>
                     </SimpleItem>
-                    <SimpleItem dataField="plyrate" colSpan={1} editorOptions={formDisabledOptions} >
-                      <Label text={`Ply Rate`} />
-                    </SimpleItem>
-                    <SimpleItem dataField="TTTL" editorOptions={formDisabledOptions} colSpan={2}>
-                      <Label text={`TT / TL`} />
-                    </SimpleItem>
-
                     <SimpleItem dataField="ProductName" editorOptions={formDisabledOptions} colSpan={2}>
                     </SimpleItem>
                     <SimpleItem dataField="LI1" colSpan={1} editorOptions={formDisabledOptions}  >
@@ -1166,35 +888,51 @@ function App(props) {
                     <SimpleItem dataField="SS1" colSpan={1} editorOptions={formDisabledOptions} >
                       <Label text={`SS1`} />
                     </SimpleItem>
-
+                    <SimpleItem dataField="inflationPressure" colSpan={2} >
+                      {/* <PatternRule message="Only numbers Accepted" pattern="[0-9]+" /> */}
+                      <Label text={`Inflation Pressure 1`} />
+                    </SimpleItem>
+                    <SimpleItem dataField="plyrate" colSpan={1} editorOptions={formDisabledOptions} >
+                      <Label text={`Ply Rate`} />
+                    </SimpleItem>
+                    <SimpleItem dataField="TTTL" editorOptions={formDisabledOptions} colSpan={2}>
+                      <Label text={`TT / TL`} />
+                    </SimpleItem>
+                    <SimpleItem dataField="NominalRimId" editorType="dxSelectBox" editorOptions={formNominalRimsOptions} colSpan={3}>
+                      <Label text={`Nominal rim (according ETRTO, ECE ...)`} />
+                    </SimpleItem>
+                    <SimpleItem dataField="CataloguePermittedRims" editorType="dxTagBox" editorOptions={formCataloguePermittedOptions} colSpan={6}>
+                      <Label text={`Permitted Rims`} />
+                    </SimpleItem>
+                  </Tab>
+                  <Tab title="More Info" colCount={4}>
                     <SimpleItem dataField="LI2" colSpan={1} editorOptions={formDisabledOptions} >
-                      <PatternRule message="Only numbers from 0 to 999" pattern="^[0-9]{1,3}$" />
+                      {/* <PatternRule message="Only numbers from 0 to 999" pattern="^[0-9]{1,3}$" /> */}
                       <Label text={`LI2`} />
                     </SimpleItem>
                     <SimpleItem dataField="SS2" colSpan={1} editorOptions={formDisabledOptions} >
-                      <PatternRule message="Only letters and numbers maximum 2 character" pattern="^[a-zA-Z0-9]{0,2}$" />
+                      {/* <PatternRule message="Only letters and numbers maximum 2 character" pattern="^[a-zA-Z0-9]{0,2}$" /> */}
                       <Label text={`SS2`} />
                     </SimpleItem>
-                    <SimpleItem dataField="additionalMarking" colSpan={2} editorOptions={formDisabledOptions} >
+                    <SimpleItem dataField="additionalMarking" colSpan={1} editorOptions={formDisabledOptions} >
                       <Label text={`Additional Marking`} />
                     </SimpleItem>
                     <SimpleItem dataField="loadRange" colSpan={1} editorOptions={formDisabledOptions} >
                       <Label text={`Load Range`} />
                     </SimpleItem>
-                    <SimpleItem dataField="inflationPressure2" colSpan={2} editorOptions={formDisabledOptions} >
-                      <PatternRule message="Only numbers Accepted" pattern="[0-9]+" />
+                    <SimpleItem dataField="inflationPressure2" colSpan={1} editorOptions={formDisabledOptions} >
+                      {/* <PatternRule message="Only numbers Accepted" pattern="[0-9]+" /> */}
                       <Label text={`Inflation Pressure 2`} />
                     </SimpleItem>
-                    <SimpleItem dataField="tireStrength" editorType="dxSelectBox" editorOptions={formDisabledOptions} colSpan={2}>
+                    <SimpleItem dataField="tireStrength" editorType="dxSelectBox" editorOptions={formDisabledOptions} colSpan={1}>
                       <Label text={`Tire Strength`} />
                     </SimpleItem>
                     <SimpleItem dataField="TreadTypeName" editorType="dxSelectBox" editorOptions={formDisabledOptions} colSpan={2}>
                       <Label text={`Tread type`} />
                     </SimpleItem>
-                    <SimpleItem dataField="noteCatalogue" editorType="dxTextArea" editorOptions={formNoteOptions3} colSpan={6} >
-                      <Label text={`Catalogue's note`} />
+                    <SimpleItem dataField="note" editorType="dxTextArea" editorOptions={formNoteOptions} colSpan={4} >
+                      <Label text={`Note`} />
                     </SimpleItem>
-
                   </Tab>
 
                   <Tab title="Samples" colCount={4}>
@@ -1202,7 +940,7 @@ function App(props) {
                       <DataGrid
                         disabled={sampleTiresGridDisabled}
                         id="formSampleTiresGrid"
-                        dataSource={storeSampleTiresForm}
+                        dataSource={storeSampleTiresMaster}
                         showBorders={false}
                         showRowLines={false}
                         columnAutoWidth={true}
@@ -1210,8 +948,8 @@ function App(props) {
                         virtualModeEnabled={true}
                         height={'500px'}
                         width={'100%'}
-                        repaintChangesOnly={false}
-                        cacheEnabled={false}
+                        repaintChangesOnly={true}
+                        cacheEnabled={true}
                       >
                         <StateStoring enabled={true} type="localStorage" storageKey="formSampleTiresGrid" />
                         <Scrolling mode="virtual" columnRenderingMode="virtual" />
@@ -1220,11 +958,11 @@ function App(props) {
                         <FilterPanel visible={false} />
                         <Selection mode="single" />
                         <SearchPanel visible={true} highlightSearchText={true} />
-                        <Editing mode="row" allowUpdating={true} allowAdding={true} allowDeleting={true} refreshMode="full">
+                        <Editing mode="row" allowUpdating={true} allowAdding={true} allowDeleting={true} refreshMode="reshape">
                           <Texts confirmDeleteMessage="Are you sure to delete?" />
                         </Editing>
                         <Selection mode="single" />
-                        <Column caption="Sample id" dataField="sampleId" dataType="number" >
+                        <Column caption="Sample id" dataField="number" dataType="number" >
                           <RequiredRule message="Required" />
                         </Column>
                         <Column caption="Production date" dataField="productionDate" dataType="string" >
@@ -1246,13 +984,13 @@ function App(props) {
                 </TabbedItem>
               </FormForm>
             </Popup>
-            :
+          ) : (
             <Popup
               title={"Tires's dependencies"}
               showTitle={true}
               height="700"
               width="800"
-              closeOnOutsideClick={false}
+              closeOnOutsideClick={true}
               visible={popupVisible}
               onHiding={onHiding}>
               <FormForm>
@@ -1295,6 +1033,7 @@ function App(props) {
                 </TabbedItem>
               </FormForm>
             </Popup>
+          )
           }
 
         </div>
