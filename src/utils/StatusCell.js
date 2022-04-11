@@ -5,7 +5,7 @@ import Bullet, {
 } from 'devextreme-react/bullet';
 import { Button } from "devextreme-react";
 // PROBLEM 1 HERE
-
+// title: render a tooltip inside a component like button
 // 1) is it possible to render a different thing with the tooltip? I would like to render a circle instead of the bullet for example, but I don't know how to do it
 // i am rendering a button now, how could i rendere the tooltip with it?  i am using the hint property but i would want to understand how to render a tooltip inside of it
 
