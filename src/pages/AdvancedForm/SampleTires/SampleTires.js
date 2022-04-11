@@ -104,7 +104,7 @@ export default function SampleTiresTemplate(props) {
         grid2.current.instance.option("focusedRowIndex", -1);
 
         //PROBLEM HERE 2
-        // am i setting the default values in the right way for the new row?
+        // am i setting the default values in the right way for the new row? 
         dispatchPopup({
             type: "initPopup",
             data: {

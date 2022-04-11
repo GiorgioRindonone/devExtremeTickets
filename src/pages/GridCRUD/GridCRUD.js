@@ -12,7 +12,7 @@ import {
     // machineVariables 
 } from "../data.js";
 // import { datapages } from "../structurePages.js"
-import handlerGrid from "../handlerData.js";
+// import HandlerGrid from "../HandlerData.js";
 import 'devextreme-react/tag-box'
 import React, { useCallback, useState, useMemo } from "react";
 

@@ -1,6 +1,6 @@
 import './Machines.scss';
 import { machines, directions, states, testTypes, logs } from "../data.js";
-import handlerGrid from "../handlerData.js";
+// import handlerGrid from "../HandlerData.js";
 import 'devextreme-react/tag-box'
 import {useCallback, useState, useMemo } from "react";
 import React from 'react';

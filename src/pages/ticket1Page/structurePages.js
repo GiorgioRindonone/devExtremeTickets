@@ -1,5 +1,5 @@
 import { states } from "./data.js";
-import handlerGrid from "./handlerData.js";
+import handlerGrid from "./HandlerData.js";
 
 export const datapages={
     machines:{

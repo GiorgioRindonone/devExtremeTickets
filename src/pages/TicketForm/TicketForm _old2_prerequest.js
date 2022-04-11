@@ -2,7 +2,7 @@ import React, { useMemo, useReducer, useCallback, useState, } from 'react';
 
 import { machines, directions, states, testTypes, person } from "../data.js";
 
-import handlerGrid from "../handlerData.js";
+// import handlerGrid from "../handlerData.js";
 import "devextreme-react/tag-box";
 import { Button } from "devextreme-react/button";
 import DataGrid, {

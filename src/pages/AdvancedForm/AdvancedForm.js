@@ -612,7 +612,7 @@ function App(props) {
   }, [grid]);
 
 
-  // PROBLEM  HERE 1 
+  // PROBLEM HERE 1 
   // title: edit giving the data to the form
   // 1) i need to edit the form passing the data, i've tried this with dispatch cause the form it's not working properly anymore, so i need to force to read the data again
   // 2) cause the grid in the dropdown in line 1086 i think it's out of the formGroup items, i need to set its value for editing, i was thinking to use the same method as in the add
