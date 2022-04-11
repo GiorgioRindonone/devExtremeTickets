@@ -57,33 +57,22 @@ export default function SampleTiresTemplate(props) {
 
     const selectionChangedHandler = useCallback((e) => {
         // e.selectedRowsData[0] && setId(e.selectedRowsData[0].id);
+
+        // PROBLEM HERE 
+        // 1) gridSelectId it gives me always -1 when i set it with e.component.getRowIndexByKey(e.selectedRowKeys[0]) maybe am i taking in the wrong method?
+        // 2) should i use e.selectedRowKeys[0] or e.component.getRowIndexByKey(e.selectedRowKeys[0]) ? cause the first give me values, but the first row is 1, is it correst?
         e.selectedRowsData[0] && setObjectData(e.selectedRowsData[0]);
         setGridSelectId(e.component.getRowIndexByKey(e.selectedRowKeys[0]));
-        // console.log("row index da saturno",e.component.getRowIndexByKey(e.selectedRowKeys[0]), "row data da saturno", e.selectedRowsData[0], id);
-        // e.selectedRowsData[0] && setNewSidebar(e.selectedRowsData[0])
-        // setRowIndex(e.component.getRowIndexByKey(e.selectedRowKeys[0]));
         setSelectedRowIndex(e.component.getRowIndexByKey(e.selectedRowKeys[0]));
-        // console.log("props key", props.data.key);
-        // console.log("props sel row ind", props);
-        // console.log("props data", props.data);
-        console.log("e.selectedRowKeys[0]", e.selectedRowKeys[0], "e.component", e.component.getRowIndexByKey());
+        console.log("check e.selectedRowKeys[0]", e.selectedRowKeys[0], "check e.component", e.component.getRowIndexByKey());
         console.log("gridSelectId", gridSelectId);
-        // console.log("context sidebar data", data);
-        // console.log("context sidebar id", index);
-        // console.log("props objSide", props.objectSidebarData);
-        // console.log("props data", props.data);
-        // console.log("props data ta", props.data.data);
-
-        // e.selectedRowsData[0] && props.setObjectSidebarData(e.selectedRowsData[0])
-        // props.setSelectedRowIndex(e.component.getRowIndexByKey(e.selectedRowKeys[0]));
-        // props.sidebar === 0 && props.setSidebar(500);
     }, [props]);
 
 
     const { tireid } = props.data.key;
     // const { tireID } = props.data.data;
     const { identifier } = props.data.data;
-    console.log("dati del pop da saturno", props.data.data, props.data.key, identifier, tireid);
+    console.log("data from the prop grid Tires", props.data.data, props.data.key, identifier, tireid);
 
 
     // const selectionChangedHandler = useCallback((e) => {
@@ -92,7 +81,7 @@ export default function SampleTiresTemplate(props) {
     const storeSampleTiresMaster = getSampleTires(props.data.key);
 
     function getSampleTires(keyP) {
-        console.log("key", keyP);
+        console.log("check of the key i am taking from the prop grid", keyP);
         return (new DataSource({
             store: storeSampleTires,
             filter: ['TireId', '=', keyP],
@@ -107,6 +96,9 @@ export default function SampleTiresTemplate(props) {
         store.load();
         // setEditState(false);
         grid2.current.instance.option("focusedRowIndex", -1);
+
+        //PROBLEM HERE 
+        // am i setting the default values in the right way for the new row?
         dispatchPopup({
             type: "initPopup",
             data: {
@@ -134,40 +126,30 @@ export default function SampleTiresTemplate(props) {
     }, []);
 
     //! 
-    // function onToolbarPreparing(e) {
-    //     let toolbarItems = e.toolbarOptions.items;
-    //     // customize addRow toolbar button
-    //     for (let i = 0; i < toolbarItems.length; i++) {
-    //         let item = toolbarItems[i];
-    //         if (item.name === "addRowButton") {
-    //             item.options.onClick = addClick;
-    //             break;
-    //         }
-    //     }
-    // }
 
     //!
-    // function editClick(e) {
-    //     showPopup("Edit", { ...e.row.data });
-    // }
 
 
     //!
-    // function addClick(e) {
-    //     showPopup("Add",
-    //         {
-    //             TireId: id
-    //         });
-    // }
 
     function confirmClick(e) {
         let result = getFormSide().validate();
         let store = storeSampleTiresMaster.store();
+
+        // PROBLEM HERE 
+        // 1) i can't take the popupMode anymore, i am having problem to take the popupMode from the popup reducer to do the insert and the update
+        // 2) i think the reducer it's not working properly, cause i can't the the popupMode, so i can't do the insert or update
+        // 3) if you check the formData, it has not all the datas i insert 
+
+
+        //if i put the insert here without the control of the popupMode, it works fine, but if i put the insert here with the control of the popupMode, it doesn't work
+        // comment this line to check the thing
+        console.log("popup mode from sampleTires", popupMode);
+        console.log("form data from sampleTires", formData);
         store.insert(formData);
 
         if (result.isValid) {
             if (popupMode === "Add") {
-                // cambio lo store con il nuovo oggetto
                 store.insert(formData).then(() => {
                     grid2.current.instance.refresh(true);
                 });
@@ -184,7 +166,6 @@ export default function SampleTiresTemplate(props) {
     }
 
     const confirmBtnOptions = useMemo(() => {
-        console.log("updated confirmbtnOptions")
         return {
             text: 'Confirm',
             type: 'success',
@@ -240,7 +221,7 @@ export default function SampleTiresTemplate(props) {
     const formTireOptions = {
         dataSource: storeTires,
         valueExpr: 'id',
-        displayExpr: 'identifier',
+        displayExpr: 'id',
         value: { idTire },
         readOnly: false,
     }
@@ -283,7 +264,6 @@ export default function SampleTiresTemplate(props) {
 
             <DataGrid
                 id="grid-sample-tires"
-                keyExpr="id"
                 ref={grid2}
                 dataSource={storeSampleTiresMaster}
                 showBorders={true}

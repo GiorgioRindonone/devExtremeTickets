@@ -81,6 +81,8 @@ import { logDOM } from "@testing-library/react";
 /* 11. Data import */
 // import service from "./data.js";
 
+
+
 const arrayTireStrength = [
   {
     id: 0,
@@ -492,8 +494,12 @@ function App(props) {
   // const storeSampleTiresMaster = getSampleTires(objectSidebarData.id);
   // console.log("storesamplemaster", storeSampleTiresMaster._store._array);
 
-  const storeSampleTiresMaster = getSampleTires(objectSidebarData.id);
-  console.log("storesamplemaster", storeSampleTiresMaster._store._array);
+  const storeSampleTiresForm = useCallback(() => {
+    getSampleTires(objectSidebarData.id);
+    console.log("storesamplemaster", storeSampleTiresForm);
+  }, [objectSidebarData.id]);
+
+  // console.log("storesamplemaster", storeSampleTiresForm._store._array);
 
   function getSampleTires(keyP) {
     console.log("key", keyP);
@@ -551,7 +557,7 @@ function App(props) {
     }
     // console.log("selectedObject", selectedObject, typeof selectedObject);
 
-  }, [objectSidebarData]);
+  }, [objectSidebarData, editState]);
 
   useEffect(() => {
     if (selectedObject != null && selectedObject.length > 0) {
@@ -566,7 +572,7 @@ function App(props) {
     } else {
       setMappedSelectedObject([]);
     }
-  }, [objectSidebarData, selectedObject]);
+  }, [objectSidebarData, selectedObject, editState]);
 
 
   // GESTIONE GRID
@@ -591,10 +597,9 @@ function App(props) {
 
   //! reducer edit and insert
   const addRow = useCallback(() => {
-
+    setGridBoxValue(null);
     setSampleTiresGridDisabled(true);
     setPopUpType("form");
-
     setEditState(false);
     dispatchPopup({
       type: "initPopup",
@@ -615,25 +620,25 @@ function App(props) {
       type: "initPopup",
       data: {
         ...rowData,
-        year: rowData.Year,
-        SampleTypeAcronym: rowData.SampleTypeAcronym,
-        SizeName: rowData.Catalogue.SizeName,
-        ApplicationAcronym: rowData.Catalogue.ApplicationAcronym,
-        BrandName: rowData.Catalogue.BrandName,
-        ProductName: rowData.Catalogue.ProductName,
-        LI1: rowData.Catalogue.LI1,
-        SS1: rowData.Catalogue.SS1,
-        plyrate: rowData.Catalogue.plyrate,
-        TTTL: rowData.Catalogue.TTTL,
-        NominalRimId: rowData.NominalRimId,
-        LI2: rowData.Catalogue.LI2,
-        SS2: rowData.Catalogue.SS2,
-        additionalMarking: rowData.Catalogue.additionalMarking,
-        loadRange: rowData.Catalogue.loadRange,
-        inflationPressure2: rowData.Catalogue.inflationPressure2,
-        tireStrength: rowData.Catalogue.tireStrength,
-        TreadTypeName: rowData.Catalogue.TreadTypeName,
-        noteCatalogue: rowData.Catalogue.note,
+        year: rowData.Year, 
+        SampleTypeAcronym: rowData.SampleTypeAcronym, 
+        SizeName: rowData.Catalogue.SizeName, 
+        ApplicationAcronym: rowData.Catalogue.ApplicationAcronym, 
+        BrandName: rowData.Catalogue.BrandName, 
+        ProductName: rowData.Catalogue.ProductName, 
+        LI1: rowData.Catalogue.LI1, 
+        SS1: rowData.Catalogue.SS1, 
+        plyrate: rowData.Catalogue.plyrate, 
+        TTTL: rowData.Catalogue.TTTL, 
+        NominalRimId: rowData.NominalRimId, 
+        LI2: rowData.Catalogue.LI2, 
+        SS2: rowData.Catalogue.SS2, 
+        additionalMarking: rowData.Catalogue.additionalMarking, 
+        loadRange: rowData.Catalogue.loadRange, 
+        inflationPressure2: rowData.Catalogue.inflationPressure2, 
+        tireStrength: rowData.Catalogue.tireStrength, 
+        TreadTypeName: rowData.Catalogue.TreadTypeName, 
+        noteCatalogue: rowData.Catalogue.note, 
       },
       popupMode: "Edit"
     })
@@ -641,55 +646,70 @@ function App(props) {
   }, [grid]);
 
   function confirmClick(e) {
+
+
     let result = getForm().validate();
+    // PROBLEM HERE 
+
+    // 1) i check the formData and there is nothing of the data i have inserted in the form
     console.log("form before update", formData);
+    // 2) if i check the option formData there are all the infos i have in the form, how is it possible? if i check che istance of the formData there is nothing
     let option = getForm().option("formData");
     console.log("option to update", option);
+    //3 ) the formData is not updated, why?
     getForm().updateData(option);
     console.log("after update form", result, formData, option);
 
 
+
     if (result.isValid) {
-      log("adddddddddddddddddddddddddddddddddddddddddddddddddd", popupMode);
+      // PROBLEM HERE 
+
+      // 1) the popupMode is not updated from the buttons, but is undefned why?
+      console.log("popupMode STATUS check", popupMode);
+      // 2) if i do the insert here of course it works, but i have to do it using the reducer
+      // i think that this problem is connected with the other one about the formData, i can't rely why but i think it is...
+      // maybe am i calling the reducer in a bad way? cause since i have implemented the grid in the dropdown it started to give me problems...
+
       storeTires.insert(option).then(() => {
-        // cambio lo store con il nuovo oggetto
         grid.current.instance.refresh(true);
-        // dispatchPopup({ type: "hidePopup" });
       });
+      // dispatchPopup({ type: "hidePopup" });
       setSampleTiresGridDisabled(false);
 
       if (popupMode === "Add") {
+        console.log("popupmode ADD check");
         storeTires.insert(option).then(() => {
           setSampleTiresGridDisabled(false);
           // cambio lo store con il nuovo oggetto
           grid.current.instance.refresh(true);
-          // dispatchPopup({ type: "hidePopup" });
         });
+        dispatchPopup({ type: "hidePopup" });
 
       }
       else if (popupMode === "Edit") {
-        log("eeeeeeeeeeeeeeeeeeeeeeeeeeedddddddddddddddddddddddddddddddddddddddddddddddddd")
+        console.log("popupmode EDIT check")
 
         storeTires.update(objectSidebarData.id, option).then(() => {
           grid.current.instance.refresh(true);
           setSampleTiresGridDisabled(false);
         });
-
-        // storeContacts.reload();
-        // grid.current.instance.refresh(true);
-        // dispatchPopup({ type: "hidePopup" });
       }
+      dispatchPopup({ type: "hidePopup" });
+
     }
+    setEditState(false);
   }
 
   function closeClick(e) {
     setSampleTiresGridDisabled(true);
     setGridBoxValue(null);
     dispatchPopup({ type: "hidePopup" });
+    setGridBoxValue(null);
+    setEditState(false);
   }
 
   const confirmBtnOptions = useMemo(() => {
-    console.log("updated confirmbtnOptions")
     return {
       text: 'Apply',
       type: 'success',
@@ -699,7 +719,6 @@ function App(props) {
   }, []);
 
   const closeBtnOptions = useMemo(() => {
-    console.log("updated closedbutton")
     return {
       text: 'Confirm',
       type: 'danger',
@@ -708,13 +727,6 @@ function App(props) {
     }
   }, []);
 
-
-  // const cancelBtnOptions = useMemo(() => {
-  //   return {
-  //     text: 'Cancel',
-  //     onClick: cancelClick
-  //   }
-  // }, []);
 
 
   function cancelClick(e) {
@@ -741,8 +753,6 @@ function App(props) {
     setEditState(false);
 
     storeTreadTypes.load();
-
-
     // grid.current.instance.option("focusedRowIndex", -1);
     dispatchPopup({
       type: "openGridPopup",
@@ -765,24 +775,6 @@ function App(props) {
     valueExpr: 'id',
     displayExpr: 'name',
   }
-
-  // function renderState(data) {
-  //   return <span> {data.identifier} </span>;
-  // }
-  // const formSizesOptions = {
-  //   dataSource: storeSizes,
-  //   valueExpr: 'identifier',
-  //   buttons:'dropdown',
-  //   itemRender: {renderState},
-  //   // placeholder: "Type the identifier...",
-  //   searchExpr: "identifier"
-  // }
-
-  // const formSizeStructureOptions = {
-  //   dataSource: storeSizeStructures,
-  //   valueExpr: 'id',
-  //   displayExpr: 'name'
-  // }
 
   const formDisabledOptions = {
     readOnly: true,
@@ -819,35 +811,6 @@ function App(props) {
   }
 
 
-  // const formCatalogueOptions = {
-  //   dataSource: storeCatalogues,
-  //   valueExpr: 'id',
-  //   // valueExpr: 'SizeName' + ' ' + 'BrandName',
-  //   searchEnabled: true,
-  //   searchTimeout: 200,
-  //   minSearchLength: 1,
-  //   searchExpr: ["SizeName"],
-  //   placeholder: 'Type two symbols to search...',
-  //   searchMode: 'contains',
-  //   showClearButton: true,
-  //   // fieldRender: {fieldCatalogueForm},
-  //   itemRender: { renderCatalogueForm },
-  //   // fieldRender: {renderCatalogueForm},
-  // }
-
-  // const formCatalogueOptions2 = {
-  //   value: { gridBoxValue },
-  //   opened: { isGridBoxOpened },
-  //   valueExpr: "id",
-  //   deferRendering: false,
-  //   displayExpr: { gridBoxDisplayExpr },
-  //   placeholder: "Select a value...",
-  //   showClearButton: true,
-  //   dataSource: { storeCatalogues },
-  //   onValueChanged: { syncDataGridSelection },
-  //   onOptionChanged: { onGridBoxOpened },
-  //   contentRender: { dataGridRender },
-  // }
   const formCataloguePermittedOptions = {
     dataSource: storeNominalRims,
     valueExpr: 'id',
@@ -924,7 +887,7 @@ function App(props) {
             selectedRowIndex={selectedRowIndex}
             editRow={editRow}
             deleteRow={deleteRow}
-            // title={objectSidebarData.id ? objectSidebarData.id : "Select a Tire"}
+          // title={objectSidebarData.id ? objectSidebarData.id : "Select a Tire"}
           >
             <TabPanel className="tabpanel-sidebar">
               <ItemPanel title="General" >
@@ -1219,7 +1182,7 @@ function App(props) {
                       <DataGrid
                         disabled={sampleTiresGridDisabled}
                         id="formSampleTiresGrid"
-                        dataSource={storeSampleTiresMaster}
+                        dataSource={storeSampleTiresForm}
                         showBorders={false}
                         showRowLines={false}
                         columnAutoWidth={true}

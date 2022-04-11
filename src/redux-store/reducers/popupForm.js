@@ -3,15 +3,17 @@ import React from 'react'
 
 
 //! creo la ref del Form per poterlo usare nel reducer
-export const formRef = React.createRef();
-
-export const getForm = () => {
-  return formRef.current.instance;
-};
 
 export const formRefSide = React.createRef();
 
 export const getFormSide = () => {
+  return formRef.current.instance;
+};
+
+
+export const formRef = React.createRef();
+
+export const getForm = () => {
   return formRef.current.instance;
 };
 
