@@ -59,7 +59,7 @@ import {
 
 
 /* 7. Internal functions imports in brackets */
-import { SidebarDataProvider, useSidebarData } from "../../contexts/SidebarDataContext.js";
+import { SidebarDataProvider, useSidebarData, setEditStateFormStatus, editStateForm } from "../../contexts/SidebarDataContext.js";
 
 // import {URL} from "../../api/apiManager.js";
 import { initPopupState, popupReducer, formRef, getForm, formRefSide, getFormSide } from "../../redux-store/reducers/popupForm.js";
@@ -344,7 +344,7 @@ const SampleTiresItem = (props) => {
 function App(props) {
 
   // const [objectSidebarData, setObjectData] = React.useState({});
-  const { objectSidebarData, setObjectData, sidebarMain, setSidebarMainStatus } = useSidebarData();
+  const { objectSidebarData, setObjectData, sidebarMain, setSidebarMainStatus, setEditStateFormStatus, editStateForm } = useSidebarData();
   const [selectedRowIndex, setSelectedRowIndex] = React.useState(-1);
   // const [focusedRowKey, setFocusedRowKey] = React.useState(-1);
   const [sidebar, setSidebar] = React.useState(0);
@@ -532,6 +532,7 @@ function App(props) {
     storeLogs.load();
   }, [objectSidebarData]);
 
+
   //SAMPLE TIRES
   useEffect(() => {
     const key = objectSidebarData.id;
@@ -557,7 +558,7 @@ function App(props) {
     }
     // console.log("selectedObject", selectedObject, typeof selectedObject);
 
-  }, [objectSidebarData, editState]);
+  }, [objectSidebarData]);
 
   useEffect(() => {
     if (selectedObject != null && selectedObject.length > 0) {
@@ -572,7 +573,7 @@ function App(props) {
     } else {
       setMappedSelectedObject([]);
     }
-  }, [objectSidebarData, selectedObject, editState]);
+  }, [objectSidebarData, selectedObject, editStateForm]);
 
 
   // GESTIONE GRID
@@ -591,7 +592,7 @@ function App(props) {
   const openSidebar = useCallback(() => {
     console.log(selectedRowIndex);
     sidebar === 500 ? setSidebar(0) : setSidebar(500);
-  }, [sidebar, selectedRowIndex]);
+  }, [sidebar, selectedRowIndex, editStateForm]);
 
 
 
@@ -600,7 +601,7 @@ function App(props) {
     setGridBoxValue(null);
     setSampleTiresGridDisabled(true);
     setPopUpType("form");
-    setEditState(false);
+    setEditStateFormStatus(!editStateForm);
     dispatchPopup({
       type: "initPopup",
       data: {},
@@ -610,35 +611,43 @@ function App(props) {
     grid.current.instance.option("focusedRowIndex", -1);
   }, [grid]);
 
+
+  // PROBLEM HERE 
+  // title: edit giving the data to the form
+  // 1) i need to edit the form passing the data, i've tried this with dispatch cause the form it's not working properly anymore, so i need to force to read the data again
+  // 2) cause the grid in the dropdown in line 1086 i think it's out of the formGroup items, i need to set its value for editing, i was thinking to use the same method as in the add
+  // where when i change the selection of the grid, it will populate the fields with the data, but of course now i have all the data in the row cause i am in editing
+  // 3) are you sure the method from line 629 in the right one to pass the data to the form? maybe am i doing wrong?
+
   const editRow = useCallback(() => {
     setSampleTiresGridDisabled(false);
     setPopUpType("form");
-    setEditState(true);
+    setEditStateFormStatus(!editStateForm);
     const rowData = grid.current.instance.getSelectedRowsData()[0];
     setGridBoxValue(rowData.CatalogueId);
     dispatchPopup({
       type: "initPopup",
       data: {
         ...rowData,
-        year: rowData.Year, 
-        SampleTypeAcronym: rowData.SampleTypeAcronym, 
-        SizeName: rowData.Catalogue.SizeName, 
-        ApplicationAcronym: rowData.Catalogue.ApplicationAcronym, 
-        BrandName: rowData.Catalogue.BrandName, 
-        ProductName: rowData.Catalogue.ProductName, 
-        LI1: rowData.Catalogue.LI1, 
-        SS1: rowData.Catalogue.SS1, 
-        plyrate: rowData.Catalogue.plyrate, 
-        TTTL: rowData.Catalogue.TTTL, 
-        NominalRimId: rowData.NominalRimId, 
-        LI2: rowData.Catalogue.LI2, 
-        SS2: rowData.Catalogue.SS2, 
-        additionalMarking: rowData.Catalogue.additionalMarking, 
-        loadRange: rowData.Catalogue.loadRange, 
-        inflationPressure2: rowData.Catalogue.inflationPressure2, 
-        tireStrength: rowData.Catalogue.tireStrength, 
-        TreadTypeName: rowData.Catalogue.TreadTypeName, 
-        noteCatalogue: rowData.Catalogue.note, 
+        year: rowData.Year,
+        SampleTypeAcronym: rowData.SampleTypeAcronym,
+        SizeName: rowData.Catalogue.SizeName,
+        ApplicationAcronym: rowData.Catalogue.ApplicationAcronym,
+        BrandName: rowData.Catalogue.BrandName,
+        ProductName: rowData.Catalogue.ProductName,
+        LI1: rowData.Catalogue.LI1,
+        SS1: rowData.Catalogue.SS1,
+        plyrate: rowData.Catalogue.plyrate,
+        TTTL: rowData.Catalogue.TTTL,
+        NominalRimId: rowData.NominalRimId,
+        LI2: rowData.Catalogue.LI2,
+        SS2: rowData.Catalogue.SS2,
+        additionalMarking: rowData.Catalogue.additionalMarking,
+        loadRange: rowData.Catalogue.loadRange,
+        inflationPressure2: rowData.Catalogue.inflationPressure2,
+        tireStrength: rowData.Catalogue.tireStrength,
+        TreadTypeName: rowData.Catalogue.TreadTypeName,
+        noteCatalogue: rowData.Catalogue.note,
       },
       popupMode: "Edit"
     })
@@ -650,7 +659,7 @@ function App(props) {
 
     let result = getForm().validate();
     // PROBLEM HERE 
-
+    // title: giving the data to the form, but the form is not working properly with the data
     // 1) i check the formData and there is nothing of the data i have inserted in the form
     console.log("form before update", formData);
     // 2) if i check the option formData there are all the infos i have in the form, how is it possible? if i check che istance of the formData there is nothing
@@ -664,7 +673,7 @@ function App(props) {
 
     if (result.isValid) {
       // PROBLEM HERE 
-
+      // title: the popupMode is not working properly, can't take the status
       // 1) the popupMode is not updated from the buttons, but is undefned why?
       console.log("popupMode STATUS check", popupMode);
       // 2) if i do the insert here of course it works, but i have to do it using the reducer
@@ -698,7 +707,8 @@ function App(props) {
       dispatchPopup({ type: "hidePopup" });
 
     }
-    setEditState(false);
+
+    setEditStateFormStatus(!editStateForm);
   }
 
   function closeClick(e) {
@@ -706,7 +716,8 @@ function App(props) {
     setGridBoxValue(null);
     dispatchPopup({ type: "hidePopup" });
     setGridBoxValue(null);
-    setEditState(false);
+
+    setEditStateFormStatus(!editStateForm);
   }
 
   const confirmBtnOptions = useMemo(() => {
@@ -750,7 +761,8 @@ function App(props) {
   //! menu popup grid
   const openDependencies = useCallback(() => {
     setPopUpType("grid");
-    setEditState(false);
+
+    setEditStateFormStatus(!editStateForm);
 
     storeTreadTypes.load();
     // grid.current.instance.option("focusedRowIndex", -1);

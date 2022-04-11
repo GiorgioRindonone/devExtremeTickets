@@ -40,8 +40,12 @@ import { getObject, postObject, patchObject, deleteObject, getByKeyObject, getBy
 import { initPopupState, popupReducer, formRef, getForm, formRefSide, getFormSide } from "../../../redux-store/reducers/popupForm.js";
 import { getGridStructure } from "./GridStructure.js";
 
+import { SidebarDataProvider, useSidebarData, setEditStateFormStatus, editStateForm  } from "../../../contexts/SidebarDataContext.js";
 
 export default function SampleTiresTemplate(props) {
+    const { sidebarMain, setSidebarMainStatus, setEditStateFormStatus, editStateForm  } = useSidebarData();
+
+
     const [objectData, setObjectData] = useState({});
     const [selectedRowIndex, setSelectedRowIndex] = React.useState(-1);
 
@@ -59,6 +63,7 @@ export default function SampleTiresTemplate(props) {
         // e.selectedRowsData[0] && setId(e.selectedRowsData[0].id);
 
         // PROBLEM HERE 
+        // title: I can't take the right value from the selected row
         // 1) gridSelectId it gives me always -1 when i set it with e.component.getRowIndexByKey(e.selectedRowKeys[0]) maybe am i taking in the wrong method?
         // 2) should i use e.selectedRowKeys[0] or e.component.getRowIndexByKey(e.selectedRowKeys[0]) ? cause the first give me values, but the first row is 1, is it correst?
         e.selectedRowsData[0] && setObjectData(e.selectedRowsData[0]);
@@ -92,6 +97,7 @@ export default function SampleTiresTemplate(props) {
     //! NEW GRID HANDLE
 
     const addRow = useCallback(() => {
+        setEditStateFormStatus(!editStateForm);
         let store = storeSampleTiresMaster.store();
         store.load();
         // setEditState(false);
@@ -111,6 +117,8 @@ export default function SampleTiresTemplate(props) {
     }, []);
 
     const editRow = useCallback(() => {
+        setEditStateFormStatus(!editStateForm);
+
         const rowData = grid2.current.instance.getSelectedRowsData()[0];
         dispatchPopup({
             type: "initPopup",
@@ -137,13 +145,14 @@ export default function SampleTiresTemplate(props) {
         let store = storeSampleTiresMaster.store();
 
         // PROBLEM HERE 
+        // title: i can't take the status of the popupMode from the reducer using the form      
         // 1) i can't take the popupMode anymore, i am having problem to take the popupMode from the popup reducer to do the insert and the update
         // 2) i think the reducer it's not working properly, cause i can't the the popupMode, so i can't do the insert or update
         // 3) if you check the formData, it has not all the datas i insert 
 
 
         //if i put the insert here without the control of the popupMode, it works fine, but if i put the insert here with the control of the popupMode, it doesn't work
-        // comment this line to check the thing
+        // comment this line 156 to check the thing
         console.log("popup mode from sampleTires", popupMode);
         console.log("form data from sampleTires", formData);
         store.insert(formData);
@@ -163,6 +172,8 @@ export default function SampleTiresTemplate(props) {
                 dispatchPopup({ type: "hidePopup" });
             }
         }
+        setEditStateFormStatus(!editStateForm);
+
     }
 
     const confirmBtnOptions = useMemo(() => {

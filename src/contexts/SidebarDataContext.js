@@ -7,10 +7,11 @@ function SidebarDataProvider(props) {
     const [objectSidebarData, setObjectSidebarData] = useState({});
     //setto lo status della sidebar
     const [sidebarMain, setSidebarMain] = useState(true);
-
+    const [editStateForm, setEditStateForm] = useState(false);
     //faccio update del dato 
-    const setObjectData = useCallback((data, what) => {
-        setObjectSidebarData(data, what);
+
+    const setObjectData = useCallback((data) => {
+        setObjectSidebarData(data);
         log("setObjectData from context", data, objectSidebarData);
     }, []);
 
@@ -20,8 +21,14 @@ function SidebarDataProvider(props) {
         log("setSidebarMainStatus from context", sidebarMain);
     }, []);
 
+    const setEditStateFormStatus = useCallback((data) => {
+        setEditStateForm(data);
+        log("setEditStateFormStatus from context", sidebarMain);
+    }, []);
+
+
     return (
-        <SidebarDataContext.Provider value={{ objectSidebarData, setObjectData, sidebarMain, setSidebarMainStatus }} {...props} />
+        <SidebarDataContext.Provider value={{ objectSidebarData, setObjectData, sidebarMain, setSidebarMainStatus, setEditStateFormStatus, editStateForm  }} {...props} />
     );
 }
 
