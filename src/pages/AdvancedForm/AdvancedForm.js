@@ -53,7 +53,7 @@ import {
   storeBrands,
   storeProducts,
   storeCompanies,
-  // storeSampleTires,
+  storeSampleTires,
   storeSampleTypes
 } from "../../stores/storesDevextreme.js";
 
@@ -489,12 +489,11 @@ function App(props) {
   //   });
   // }
 
-  const storeSampleTires = getSampleTires(objectSidebarData.id);
-  console.log("storesample", storeSampleTires._store._array);
+  // const storeSampleTiresMaster = getSampleTires(objectSidebarData.id);
+  // console.log("storesamplemaster", storeSampleTiresMaster._store._array);
 
-    const storeSampleTiresForm = useCallback(() => {
-    return getSampleTires(objectSidebarData.id);
-  }, [gridBoxValue, objectSidebarData]);
+  const storeSampleTiresMaster = getSampleTires(objectSidebarData.id);
+  console.log("storesamplemaster", storeSampleTiresMaster._store._array);
 
   function getSampleTires(keyP) {
     console.log("key", keyP);
@@ -503,7 +502,6 @@ function App(props) {
       filter: ['TireId', '=', keyP],
     }));
   }
-
 
 
   //LOGS
@@ -529,26 +527,31 @@ function App(props) {
   }, [objectSidebarData]);
 
   //SAMPLE TIRES
-  // useEffect(() => {
-  //   const key = objectSidebarData.id ? objectSidebarData.id : null;
-  //   const obj = async (key) => await axios.get(`/sample-tires?TireId{eq}=${key}`)
-  //     .then((res) => {
-  //       setSelectedObject(res.data);
-  //       return res.data;
-  //     })
-  //     .catch(error => {
-  //       console.log(`error get`, error);
-  //     });
-  //   // console.log("selectedSamples", selectedObject);
-  //   if (objectSidebarData) {
-  //     setSelectedObject(obj(key));
-  //     // console.log("selectedSamples2", selectedObject);
-  //   } else {
-  //     setSelectedObject(null);
-  //   }
-  //   // console.log("selectedObject", selectedObject, typeof selectedObject);
+  useEffect(() => {
+    const key = objectSidebarData.id;
+    const storeSelected = getSampleTires(key)
+    const obj = storeSelected._store._array;
+    console.log("obj", obj, "storeSelected", storeSelected);
 
-  // }, [objectSidebarData]);
+    // const obj = async (key) => await axios.get(`/sample-tires?TireId{eq}=${key}`)
+    // .then((res) => {
+    //   setSelectedObject(res.data);
+    //   return res.data;
+    // })
+    // .catch(error => {
+    //   console.log(`error get`, error);
+    // });
+    // console.log("selectedSamples", selectedObject);
+    if (objectSidebarData) {
+      setSelectedObject(obj);
+      // setSelectedObject(obj(key));
+      console.log("selectedSamples2", selectedObject);
+    } else {
+      setSelectedObject(null);
+    }
+    // console.log("selectedObject", selectedObject, typeof selectedObject);
+
+  }, [objectSidebarData]);
 
   useEffect(() => {
     if (selectedObject != null && selectedObject.length > 0) {
@@ -1216,7 +1219,7 @@ function App(props) {
                       <DataGrid
                         disabled={sampleTiresGridDisabled}
                         id="formSampleTiresGrid"
-                        dataSource={storeSampleTiresForm}
+                        dataSource={storeSampleTiresMaster}
                         showBorders={false}
                         showRowLines={false}
                         columnAutoWidth={true}

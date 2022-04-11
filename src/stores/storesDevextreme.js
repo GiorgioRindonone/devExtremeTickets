@@ -653,6 +653,7 @@ const arrSampleTypes = [
         "name": "Sample Type 2",
     }
 ]
+
 export const storeSampleTypes = new ArrayStore({
     key: "acronym",
     data: arrSampleTypes

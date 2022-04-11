@@ -10,8 +10,8 @@ import { Button } from "devextreme-react/button";
 import { List } from 'devextreme-react/list';
 import { TreeList, Column as TreeListColumn } from 'devextreme-react/tree-list';
 import DataGrid, {
-  MasterDetail, Scrolling, Pager, Paging, RemoteOperations, Column, Editing, Lookup, Texts, Selection, FilterRow, HeaderFilter, FilterPanel, FilterBuilderPopup, SearchPanel, StateStoring, Form, Toolbar,
-  Item as ItemGrid,
+    MasterDetail, Scrolling, Pager, Paging, RemoteOperations, Column, Editing, Lookup, Texts, Selection, FilterRow, HeaderFilter, FilterPanel, FilterBuilderPopup, SearchPanel, StateStoring, Form, Toolbar,
+    Item as ItemGrid,
 } from 'devextreme-react/data-grid';
 import TabPanel, { Item as ItemPanel } from "devextreme-react/tab-panel";
 import { Drawer } from "devextreme-react/drawer";
@@ -163,19 +163,21 @@ export default function SampleTiresTemplate(props) {
     function confirmClick(e) {
         let result = getFormSide().validate();
         let store = storeSampleTiresMaster.store();
+        store.insert(formData);
 
         if (result.isValid) {
             if (popupMode === "Add") {
                 // cambio lo store con il nuovo oggetto
-                store.insert(formData);
-                grid2.current.instance.refresh(true);
+                store.insert(formData).then(() => {
+                    grid2.current.instance.refresh(true);
+                });
                 dispatchPopup({ type: "hidePopup" });
 
             }
             else if (popupMode === "Edit") {
-                store.update(formData.id, formData);
-                // storeContacts.reload();
-                grid2.current.instance.refresh(true);
+                store.update(formData.id, formData).then(() => {
+                    grid2.current.instance.refresh(true);
+                });
                 dispatchPopup({ type: "hidePopup" });
             }
         }
@@ -239,21 +241,21 @@ export default function SampleTiresTemplate(props) {
         dataSource: storeTires,
         valueExpr: 'id',
         displayExpr: 'identifier',
-        value: {idTire},
+        value: { idTire },
         readOnly: false,
     }
 
     const formIdentifierOptions = {
         readOnly: true
     }
-    
+
     const formContactOptions = {
         dataSource: storeContacts,
         valueExpr: 'id',
         displayExpr: 'firstName',
         // itemRender: renderName
-      }
-    
+    }
+
 
     return (
         <React.Fragment>
@@ -388,8 +390,8 @@ export default function SampleTiresTemplate(props) {
                             </SimpleItem>
 
                             <SimpleItem dataField="ContactId" editorType="dxSelectBox" editorOptions={formContactOptions} colSpan={2}>
-                      <Label text={`User Editor`} />
-                    </SimpleItem>
+                                <Label text={`User Editor`} />
+                            </SimpleItem>
 
 
                             {/* <SimpleItem dataField="StorageId" editorType="dxSelectBox" colSpan={1} >
