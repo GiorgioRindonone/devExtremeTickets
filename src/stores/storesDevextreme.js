@@ -127,16 +127,61 @@ export const storeMachineVariables = new CustomStore({
     byKey: async (key) => { return await getByKeyObject("machine-variables", key, "id") }
 });
 
-export const storeTestTypes = new CustomStore({
+const arrTestTypes = [
+    {
+        "id": 1,
+        "name": "Test Type 1",
+        "outdoor": true,
+        "description": "descrizione di un test type a caso per vivere",
+        "partToTest": null,
+        "complementaryNeeded": null,
+        "machineNeeded": null,
+        "allowWarehouseParts": null,
+        "forms": [1, 2]
+    },
+];
+
+export const storeTestTypes = new ArrayStore({
     key: "id",
-    loadMode: "raw",
-    cacheRawData: true,
-    load: async (key) => await getObject("test-types", key, "?add_pk=true"),
-    update: async (key, values) => await patchObject("test-types", key, values),
-    remove: async (key) => await deleteObject("test-types", key),
-    insert: async (values) => await postObject("test-types", values),
-    byKey: async (key) => { return await getByKeyObject("test-types", key, "id", "add_pk=true") }
+    data: arrTestTypes
 });
+
+
+const arrstoreForms = [
+    {
+        "id": 1,
+        "name": "form 1",
+        "description": "descrizione di un form a caso per vivere",
+        "formData": [
+            {
+                type: "header",
+                subtype: "h1",
+                label: "formBuilder in React"
+            },
+            {
+                type: "paragraph",
+                label: "This is a demonstration of formBuilder running in a React project."
+            }
+        ]
+    },
+];
+
+export const storeForms = new ArrayStore({
+    key: "id",
+    data: arrstoreForms
+});
+
+
+// export const storeTestTypes = new CustomStore({
+//     key: "id",
+//     loadMode: "raw",
+//     cacheRawData: true,
+//     load: async (key) => await getObject("test-types", key, "?add_pk=true"),
+//     update: async (key, values) => await patchObject("test-types", key, values),
+//     remove: async (key) => await deleteObject("test-types", key),
+//     insert: async (values) => await postObject("test-types", values),
+//     byKey: async (key) => { return await getByKeyObject("test-types", key, "id", "add_pk=true") }
+// });
 
 // export const storeSizeStructures = new CustomStore({
 //     key: "name",
@@ -469,6 +514,7 @@ const arrTires = [
         "inflationPressure1": 2,
         "NominalRimId": 1,
         "note": null,
+        "year": 2020,
         "createdAt": "2022-04-06T14:51:31.233Z",
         "updatedAt": "2022-04-06T14:51:31.233Z",
         "CatalogueId": 1,

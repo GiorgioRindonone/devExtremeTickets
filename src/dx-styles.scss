@@ -76,25 +76,37 @@ html, body {
 
 .button-status1 {
   .dx-icon{
-    color: #9e9e9e;
+    color: white;
   }
+  background-color: #9e9e9e;
 }
 
 .button-status2 {
   .dx-icon{
-    color: #ffc107;
+    color: white;
   }
+  background-color: #ffc107;
+
 }
 
 .button-status3 {
   .dx-icon{
-    color: #d2604b;
+    color: white;
   }
+  background-color: #d2604b;
+
 }
 
 .button-status4 {
   .dx-icon{
-    color: #6db099;
+    color: white;
+    
   }
-}
+  background-color: #6db099;
 
+}
+// SAMPLE TIRE BOX
+
+.flex-row-50 {
+  flex: 50%;
+}

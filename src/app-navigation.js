@@ -31,8 +31,11 @@ export const navigation = [
       {
         text: 'Advanced Form and Grid',
         path: '/advancedform'
+      },
+      {
+        text: 'Test Types with form',
+        path: '/testtypes'
       }
-
     ]
   }
   ];

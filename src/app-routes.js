@@ -1,5 +1,5 @@
 import { withNavigationWatcher } from './contexts/navigation';
-import { AdvancedForm, HomePage, TasksPage, ticket1Page, TicketT1053113, TicketForm, GridCRUD, CrudProblem2 } from './pages';
+import { TestType, AdvancedForm, HomePage, TasksPage, ticket1Page, TicketT1053113, TicketForm, GridCRUD, CrudProblem2 } from './pages';
 
 const routes = [
   {
@@ -30,6 +30,11 @@ const routes = [
     path: '/advancedform',
     component: AdvancedForm
   },
+  {
+    path: '/testtypes',
+    component: TestType
+  },
+
 ];
 
 export default routes.map(route => {

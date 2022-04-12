@@ -307,29 +307,34 @@ const SampleTiresItem = (props) => {
   const [exit, setExit] = useState("No exit setted");
   const enterDate = new Date(`${props.data != undefined ? props.data.createdAt : null}`).toLocaleDateString();
   const exitDate = new Date(`${props.data != undefined ? props.data.updatedAt : null}`).toLocaleDateString();
-  useCallback(() => {
-    console.log("props data sample tire", props.data);
-  }, []);
+
+  console.log("props data sample tire", props.data);
 
   return (
     <React.Fragment>
       <div className="tire-item flex-col">
         <div className="tire-item-info flex-row ">
-          <div className="tire-item-info-box flex-col">
+          <div className="tire-item-info-box flex-col flex-row-50">
             <p style={{ fontWeight: "bold" }}>Sample</p>
             <p style={{ fontSize: "30px", fontWeight: "bold", margin: "0" }}>{props.data !== undefined ? props.data.id : "No Id"}</p>
           </div>
-          <div className="tire-item-info-box flex-col">
+          <div className="tire-item-info-box flex-col flex-row-50 ">
             <p style={{ fontWeight: "bold" }}>Status</p>
-            <Button type={type} stylingMode="contained" color="primary" text={status} />
+            <Button
+              hoverStateEnabled={false}
+              activeStateEnabled={false}
+              stylingMode="contained"
+              text={(props.data.status === 2) ? `Waiting approval` : (props.data.status === 2) ? `Test in progress` : (props.data.status === 2) ? `Archivied` : `No exit data setted`}
+              elementAttr={{ class: (props.data.status === 2) ? `button-status2` : (props.data.status === 3) ? `button-status3` : (props.data.status === 4) ? `button-status4` : `button-status1` }}
+            />
           </div>
         </div>
-        <div className="tire-item-info flex-row">
-          <div className="tire-item-info-box flex-col">
+        <div className="tire-item-info flex-row ">
+          <div className="tire-item-info-box flex-col flex-row-50">
             <p style={{ fontWeight: "bold" }}>Enter</p>
             {enterDate === "Invalid Date" ? "No date avaiable" : enterDate}
           </div>
-          <div className="tire-item-info-box flex-col">
+          <div className="tire-item-info-box flex-col flex-row-50">
             <div className="flex-row"><p style={{ fontWeight: "bold" }}>Exit</p>
               {/* <p>({props.data !== undefined ? props.data.ExitType.category : "No Category"})</p> */}
             </div>
@@ -361,6 +366,8 @@ function App(props) {
   const [dataFormGet, setDataFormGet] = React.useState({});
   const [gridBoxValue, setGridBoxValue] = React.useState(null);
   const [isGridBoxOpened, setIsGridBoxOpened] = React.useState(false);
+  const [rowClicked, setRowClicked] = React.useState(false);
+  
 
 
   //grid selectbox
@@ -397,7 +404,7 @@ function App(props) {
             ProductName: dataItem.ProductName,
             LI1: dataItem.LI1,
             SS1: dataItem.SS1,
-            inflationPressure: dataItem.inflationPressure1,
+            inflationPressure1: dataItem.inflationPressure1,
             plyrate: dataItem.plyrate,
             TTTL: dataItem.TTTL,
             NominalRimId: dataItem.NominalRimId,
@@ -531,7 +538,7 @@ function App(props) {
   useEffect(() => {
     storeLogs.load();
   }, [objectSidebarData]);
-
+  var selectionChangedRaised = false;
 
   //SAMPLE TIRES
   useEffect(() => {
@@ -629,7 +636,7 @@ function App(props) {
       type: "initPopup",
       data: {
         ...rowData,
-        year: rowData.Year,
+        year: rowData.year,
         SampleTypeAcronym: rowData.SampleTypeAcronym,
         SizeName: rowData.Catalogue.SizeName,
         ApplicationAcronym: rowData.Catalogue.ApplicationAcronym,
@@ -845,6 +852,28 @@ function App(props) {
     disabled: true,
   }
 
+
+  const rowSelectionHandler = (e) => {
+    // setRowClicked(!rowClicked);
+    var dataGrid = e.component;
+    var keys = dataGrid.getSelectedRowKeys();
+    if (rowClicked === false && objectSidebarData.id === keys[0]) {
+      setRowClicked(true);
+      if (sidebar === 0) {
+        setSidebar(500);
+      }
+    } else if (objectSidebarData.id !== keys[0]) {
+      setRowClicked(false);
+    } else if (rowClicked === true && objectSidebarData.id === keys[0]) {
+      dataGrid.deselectRows(keys);
+      if (sidebar === 500) {
+        setSidebar(0);
+      }
+      setRowClicked(false);
+    }
+    console.log("rowClicked", rowClicked, "keys", keys, "objectSidebarData.id", objectSidebarData.id);
+  }
+
   //handle the field data change in form
   const onFieldDataChanged = useCallback((e) => {
     log("onFieldDataChanged", e.value, gridBoxValue);
@@ -914,7 +943,7 @@ function App(props) {
                     <SimpleItem dataField="SampleTypeAcronym" editorType="dxSelectBox" editorOptions={formSampleTypeOptions} colSpan={2}>
                       <Label text={`Sample type`} />
                     </SimpleItem>
-                    <SimpleItem dataField="inflationPressure" colSpan={2} >
+                    <SimpleItem dataField="inflationPressure1" colSpan={2} >
                       <Label text={`Inflation Pressure`} />
                     </SimpleItem>
                     <SimpleItem dataField="year" colSpan={2}>
@@ -999,6 +1028,7 @@ function App(props) {
             // cacheEnabled={true}
             height={'100%'}
             onSelectionChanged={selectionChangedHandler}
+            onRowClick={rowSelectionHandler}
           >
             <Scrolling rowRenderingMode='virtual'></Scrolling>
             <Paging defaultPageSize={8} />
@@ -1107,7 +1137,7 @@ function App(props) {
                       <RequiredRule message="Required" />
                       <Label text={`Sample type`} />
                     </SimpleItem>
-                    <SimpleItem dataField="inflationPressure" colSpan={2} >
+                    <SimpleItem dataField="inflationPressure1" colSpan={2} >
                       <RequiredRule message="Required" />
                       <PatternRule message="Only numbers Accepted" pattern="[0-9]+" />
                       <Label text={`Inflation Pressure 1`} />
